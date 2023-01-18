@@ -39,5 +39,5 @@ def get_help_booru():
   return embedMsg
 
 # Fonction pour ajouter le cog
-def setup(bot):
-    bot.add_cog(Booru(bot))
+async def setup(bot):
+    await bot.add_cog(Booru(bot))

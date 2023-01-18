@@ -3,7 +3,7 @@
 from discord.ext import commands
 from discord.embeds import Embed
 # Module du bot
-import kiri
+import tools.variables as var
 
 class Tools(commands.Cog):
     
@@ -22,7 +22,7 @@ class Tools(commands.Cog):
     @commands.command(name="version", aliases=['ver', 'botver'])
     async def version(self, ctx):
         await ctx.message.delete()
-        await ctx.send(f"Je suis en version: **{kiri.ver_num}** !")
+        await ctx.send(f"Je suis en version: **{var.ver_num}** !")
     
     # Renvoie un lien vers le repo GitHub
     @commands.command(name="github", aliases=['GitHub', 'Github', 'gitHub', "git", "Git"])
@@ -46,5 +46,5 @@ def get_help_tools():
   return embedMsg
 
 # Fonction pour ajouter le cog
-def setup(bot):
-    bot.add_cog(Tools(bot))
+async def setup(bot):
+    await bot.add_cog(Tools(bot))

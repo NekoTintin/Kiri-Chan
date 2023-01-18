@@ -1,0 +1,93 @@
+# -- coding: utf-8 --
+# Importation des bibliothèques discord
+from xmlrpc.client import boolean
+from discord.ext import commands
+from discord.embeds import Embed
+# Bibliothèques Reddit
+from praw import Reddit as reddit
+# Modules avec diverses informations.
+import tools.passwords as passwords
+import tools.variables as variables
+# Bibliothèque aléatoire
+from random import choice
+
+reddit_wrapper = reddit(
+    # ID pour s'identifier en tant que Bot sur Reddit
+    client_id = passwords.reddit_id,
+    client_secret = passwords.reddit_secret,
+    user_agent = f"discord.py:Kirlia-Chan:v{variables.ver_num}(by u/tintin361yt)",
+    # ID du compte Reddit
+    username = "Kirlia-chan",
+    password = passwords.reddit_password,
+    # Pour éviter les messages d'Async PRAW
+    check_for_async = False)   
+
+
+class FromReddit2(commands.Cog, name="Module pour Reddit"):
+    # Initialisation
+    def __init__(self, bot) -> None:
+        self.bot = bot
+        
+    # Aide pour les commandes Reddit
+    @commands.command(name="helpReddit", aliases=["helpreddit"])
+    async def aideRed(self, ctx):
+        await ctx.message.delete()
+        await ctx.send(embed=get_help_reddit())
+    
+    # Envoie le dernier post d'un subreddit dans un message Embed
+    @commands.command(name='last', aliases=['Last'])
+    async def last_post(self, ctx, subreddit):
+        await ctx.message.delete()
+        # Petit message d'attente
+        search_message = await ctx.send("<a:search:944484192018903060> Recherche sur Reddit en cours...")
+        
+        message = get_data(subreddit, "new")
+        post_id = message.footer.url
+        check_nsfw = is_nsfw_by_id(post_id[:-6])
+        
+        await search_message.delete()
+        if ctx.channel.is_nsfw() == True and check_nsfw == False:
+            await ctx.send(f"Ce post contient du NSFW, utilise la commande dans un NSFW pour afficher son contenu. (ID:)")
+        await ctx.send(embed=message)
+      
+# Récupère les informations depuis Reddit
+def get_data(subreddit: str, sort: str, limit: int = 1) -> Embed:
+    # Vérifie que le subreddit existe, sinon, renvoie un message d'erreur
+    try:
+        reddit_wrapper.subreddits.search_by_name(subreddit, exact=True)
+    except:
+        return variables.subreddit_not_found
+    
+    if sort == 'new':
+        for submission in reddit_wrapper.subreddit(subreddit).new(limit=limit):
+            message = Embed(title=f"Voici le dernier post sur r/{subreddit} par u/{submission.author}", description=submission.title, color=0xff4300)
+            message.add_field(name="Lien", value=submission.url, inline=True)
+            message.set_footer(text="Depuis Reddit - ID: " + submission.id, icon_url="https://tinyurl.com/3nmpcn5y")
+            
+            if submission.url.startswith("https://v.redd.it") or submission.url.startswith("https://www.youtube"):
+                message.set_image(url=submission.thumbnail)
+            else:
+                message.set_image(url=submission.url)
+            
+            return message
+    
+def is_nsfw_by_id(id: int) -> boolean:
+    post = reddit.submission(id)
+    return post.over_18
+    
+
+def get_help_reddit():
+  embedMsg = Embed(title="<:reddit:794069835138596886> Reddit", description="Liste des commandes pour Reddit", color=0xff4300)
+  embedMsg.add_field(name="-last [nom du subreddit]", value="Obtiens le dernier post d'un subreddit")
+  embedMsg.add_field(name="-hot [nom du subreddit]", value="Obtiens un post populaire au hasard d'un subreddit")
+  embedMsg.add_field(name="-wallpaper", value="Retourne un post du subreddit r/Wallpaper")
+  embedMsg.add_field(name="-honkai", value="Affiche un post du subreddit r/Houkai3rd")
+  embedMsg.add_field(name="-crappy", value="Affiche un post du subreddit r/CrappyDesign")
+  embedMsg.add_field(name="-upvote [ID ou URL]", value="Upvote le dernier post que j'affiche")
+  embedMsg.add_field(name="-score [ID ou URL]", value="Affiche le score du post")
+  embedMsg.add_field(name="-comments", value="Affiche les commentaires d'un post.")
+
+  return embedMsg
+        
+async def setup(bot):
+    await bot.add_cog(FromReddit2(bot))

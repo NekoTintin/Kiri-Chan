@@ -2,6 +2,7 @@
 import discord
 from discord.ext import commands
 from discord.embeds import Embed
+import tools.variables as var
 
 class Admin(commands.Cog):
     
@@ -96,5 +97,5 @@ def get_help_admin():
 
   return embedMsg
         
-def setup(bot):
-    bot.add_cog(Admin(bot))
+async def setup(bot):
+    await bot.add_cog(Admin(bot))

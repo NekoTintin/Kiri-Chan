@@ -9,14 +9,14 @@ from requests import get
 from colorthief import ColorThief as thief
 # Autres fichiers du répertoires
 import tools.passwords as pwrd
-import tools.embed_generator as generator
+from discord import File
 
 # Défini l'objet Reddit pour accéder au compte de Kirlia-Chan
 reddit = praw2zeretour(
     # ID pour s'identifier en tant que Bot sur Reddit
     client_id = pwrd.reddit_id,
     client_secret = pwrd.reddit_secret,
-    user_agent = "discord.py:kirlia-chan-bot:v2.0.0(by u/tintin361yt)",
+    user_agent = "discord.py:kirlia-chan-bot:v2.1(by u/tintin361yt)",
     # ID du compte Reddit
     username = "Kirlia-chan",
     password = pwrd.reddit_password,
@@ -36,7 +36,7 @@ class FromReddit(commands.Cog, name="Reddit module"):
         search_msg = await ctx.send("<a:search:944484192018903060> Recherche sur Reddit en cours...")
         
         liste = get_post(sub, "new", None)
-        submission, image = generator.gen_embed_reddit(liste)
+        submission, image = gen_embed_reddit(liste)
     
         # Envoie le message en MP si le post est NSFW et que le salon ne l'est pas
         if liste["nsfw"] == True and ctx.channel.is_nsfw():
@@ -54,25 +54,26 @@ class FromReddit(commands.Cog, name="Reddit module"):
     
     # Envoie un post d'un subreddit dans un message Embed
     @commands.command(name="hot")
-    async def hot(self, ctx, sub):
+    async def hot(self, ctx, sub, iteration=1):
         await ctx.message.delete()
-        # Petit message d'attente
-        search_msg = await ctx.send("<a:search:944484192018903060> Recherche sur Reddit en cours...")
+        for _ in range(0, iteration):
+            # Petit message d'attente
+            search_msg = await ctx.send("<a:search:944484192018903060> Recherche sur Reddit en cours...")
     
-        liste = get_post(sub, "hot", 30)
-        submission, image = generator.gen_embed_reddit(liste)
+            liste = get_post(sub, "hot", 30)
+            submission, image = gen_embed_reddit(liste)
     
-        # Envoie le message en MP si le post est NSFW et que le salon ne l'est pas
-        if liste["nsfw"] == True and ctx.channel.is_nsfw():
-            await ctx.send("<:nsfw:719673214644781056> Ce post contient du contenu NSFW, pour voir ce contenu, utilise la commande dans un salon NSFW (Je t'ai envoyé l'URL en privé).")
+            # Envoie le message en MP si le post est NSFW et que le salon ne l'est pas
+            if liste["nsfw"] == True and ctx.channel.is_nsfw():
+                await ctx.send("<:nsfw:719673214644781056> Ce post contient du contenu NSFW, pour voir ce contenu, utilise la commande dans un salon NSFW (Je t'ai envoyé l'URL en privé).")
+                if liste["image"] != None:
+                    return await ctx.send(file=image, embed=submission)
+                return await ctx.send(embed=submission)
+    
             if liste["image"] != None:
                 return await ctx.send(file=image, embed=submission)
-            return await ctx.send(embed=submission)
-    
-        if liste["image"] != None:
-            return await ctx.send(file=image, embed=submission)
-        await ctx.send(embed=submission)
-        await search_msg.delete()
+            await ctx.send(embed=submission)
+            await search_msg.delete()
         
     
     # Envoie un post du subreddit r/Wallpaper
@@ -81,7 +82,7 @@ class FromReddit(commands.Cog, name="Reddit module"):
         await ctx.message.delete()
         search_msg = await ctx.send("<a:search:944484192018903060> Recherche sur Reddit en cours...")
         liste = get_post("wallpaper", "hot", 30)
-        submission, image = generator.gen_embed_reddit(liste)
+        submission, image = gen_embed_reddit(liste)
         await search_msg.delete()
         await ctx.send(file=image, embed=submission)
         
@@ -92,7 +93,7 @@ class FromReddit(commands.Cog, name="Reddit module"):
         await ctx.message.delete()
         search_msg = await ctx.send("<a:search:944484192018903060> Recherche sur Reddit en cours...")
         liste = get_post("crappydesign", "hot", 30)
-        submission, image = generator.gen_embed_reddit(liste)
+        submission, image = gen_embed_reddit(liste)
         await search_msg.delete()
         await ctx.send(file=image, embed=submission)
         
@@ -105,7 +106,7 @@ class FromReddit(commands.Cog, name="Reddit module"):
         search_msg = await ctx.send("<a:search:944484192018903060> Recherche sur Reddit en cours...")
     
         liste = get_post("houkai3rd", "hot", 30)
-        submission, image = generator.gen_embed_reddit(liste)
+        submission, image = gen_embed_reddit(liste)
     
         # Envoie le message en MP si le post est NSFW et que le salon ne l'est pas
         if liste["nsfw"] == True and ctx.channel.is_nsfw():
@@ -191,13 +192,13 @@ def get_post(sub: str, sort: str, limit: int) -> dict:
     
     # Enregistre l'image du post, s'il y en a une
     if liste_message["url"].startswith("https://i.redd.it/"):
-        with open("/home/Tintin/Desktop/Kiri-chan/images/reddit.png", "wb") as f:
+        with open("/home/Tintin/discord_bot/Kiri-chan/images/reddit.png", "wb") as f:
             image = get(url=liste_message["url"])
             f.write(image.content)
-        liste_message["image"] = {"name": "reddit.png", "path": "/home/Tintin/Desktop/Kiri-chan/images/"}
+        liste_message["image"] = {"name": "reddit.png", "path": "/home/Tintin/discord_bot/Kiri-chan/images/"}
             
         # Obtient la color dominante de l'image
-        color_thief = thief("/home/Tintin/Desktop/Kiri-chan/images/reddit.png")
+        color_thief = thief("/home/Tintin/discord_bot/Kiri-chan/images/reddit.png")
         temp = color_thief.get_color(quality=9)
         
         # La convertie en couleur pour Discord
@@ -244,6 +245,23 @@ def get_comments(id):
     
   return message
 
+
+# Transforme un dictonnaire en message Embed Discord
+def gen_embed_reddit(params: dict) -> Embed and File or Embed and None:
+    message = Embed(title=params["title"], description=params["description"], color=params["color"])
+    
+    message.add_field(name="URL", value=params["url"], inline=True)
+    message.set_footer(text="Depuis Reddit - ID: " + params["id"], icon_url="https://www.elementaryos-fr.org/wp-content/uploads/2019/08/logo-reddit.png")
+        
+    # Vérifie si le message doit contenir une image
+    if params["image"] != None:
+        message.set_image(url="attachment://" + params["image"]["name"])
+        file = File(params["image"]["path"] + params["image"]["name"])
+        
+        return message, file
+    
+    return message, None
+
 def get_help_reddit():
   embedMsg = Embed(title="<:reddit:794069835138596886> Reddit", description="Liste des commandes pour Reddit", color=0xff4300)
   embedMsg.add_field(name="-last [nom du subreddit]", value="Obtiens le dernier post d'un subreddit")
@@ -257,5 +275,5 @@ def get_help_reddit():
 
   return embedMsg
 
-def setup(bot):
-    bot.add_cog(FromReddit(bot))
+async def setup(bot):
+    await bot.add_cog(FromReddit(bot))

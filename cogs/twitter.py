@@ -60,5 +60,5 @@ def get_timeline():
     return tl_list
 
 # Fonction pour ajouter le cog
-def setup(bot):
-    bot.add_cog(Twitter(bot))
+async def setup(bot):
+    await bot.add_cog(Twitter(bot))

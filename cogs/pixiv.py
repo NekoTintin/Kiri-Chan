@@ -5,6 +5,6 @@
 #api.login("")
 
 # Fonction pour ajouter le cog
-def setup(bot):
+async def setup(bot):
     #bot.add_cog(Features(bot))
     pass

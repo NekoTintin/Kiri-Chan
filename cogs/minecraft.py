@@ -1,6 +1,5 @@
 import discord
 from discord.ext import commands
-import kiri
 
 class Minecraft(commands.Cog, name="Minecraft module"):
     def __init__(self, bot):
@@ -41,5 +40,5 @@ class Minecraft(commands.Cog, name="Minecraft module"):
         role_get = discord.utils.get(guild.roles, name = role_name.capitalize())
         await member.remove_roles(role_get)
         
-def setup(bot):
-    bot.add_cog(Minecraft(bot))
+async def setup(bot):
+    await bot.add_cog(Minecraft(bot))

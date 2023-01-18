@@ -1,4 +1,3 @@
-from dis import disco
 import yt_dlp as yt
 from validators import url as testUrl
 from requests import get
@@ -7,7 +6,7 @@ from discord.ext import commands
 from discord.embeds import Embed
 from colorthief import ColorThief as thief
 from tools import embed_generator as generator
-import kiri
+import tools.variables as var
 import time
 
 save_path = "/var/www/html/youtube_audios/"
@@ -51,11 +50,11 @@ def get_video_data(search: str) -> dict:
 
 
 class FromYoutube(commands.Cog, name="Youtube module"):
-    def __init__(self, bot, online_message):
+    def __init__(self, bot):
         self.bot = bot
         self.voice = None
         self.current_url = None
-        self.online_message = online_message  
+        self.online_message = var.online_message
         
     # Commandes pour le streaming depuis YouTube
     @commands.command(name="play")
@@ -68,11 +67,11 @@ class FromYoutube(commands.Cog, name="Youtube module"):
         data = get_video_data(query)
     
         thumb = "https://i.ytimg.com/vi_webp/" + data["id"] + "/maxresdefault.webp"
-        with open("/home/Tintin/Desktop/Kiri-chan/images/youtube.png", "wb") as f:
+        with open("/home/Tintin/discord_bot/Kiri-chan/images/youtube.png", "wb") as f:
             image = get(url=thumb)
             f.write(image.content)
            
-        color_thief = thief("/home/Tintin/Desktop/Kiri-chan/images/youtube.png")
+        color_thief = thief("/home/Tintin/discord_bot/Kiri-chan/images/youtube.png")
         col = color_thief.get_color(quality=9)
         color = discord.Colour.from_rgb(col[0], col[1], col[2])
         
@@ -86,7 +85,7 @@ class FromYoutube(commands.Cog, name="Youtube module"):
         msg, image = generator.gen_embed_yt(
             {"title": data["title"],
             "description": f"Lecture de la vidéo dans le salon **{channel.name}**.",
-            "image": {"name": "youtube.png", "path": "/home/Tintin/Desktop/Kiri-chan/images/"},
+            "image": {"name": "youtube.png", "path": "/home/Tintin/discord_bot/Kiri-chan/images/"},
             "color": color})
 
         guild = ctx.guild
@@ -127,7 +126,7 @@ class FromYoutube(commands.Cog, name="Youtube module"):
         
         
     # Remet la musique à 00:00
-    @commands.command(name="rewind", aliases=['restart'])
+    @commands.command(name="rewind", aliases=['restart', 'rw'])
     async def retour_au_debut(self, ctx):
         await ctx.message.delete()
         try:
@@ -148,7 +147,7 @@ class FromYoutube(commands.Cog, name="Youtube module"):
         await ctx.message.delete()
         if self.voice.is_playing():
             self.voice.stop()
-            await self.bot.change_presence(status=discord.Status.online, activity=discord.Activity(type=discord.ActivityType.watching, name=kiri.online_message))
+            await self.bot.change_presence(status=discord.Status.online, activity=discord.Activity(type=discord.ActivityType.watching, name=self.online_message))
         else:
             await ctx.send("Aucune musique n'est jouée actuellement")
 
@@ -229,5 +228,5 @@ def get_help_yt():
 
   return embedMsg
         
-def setup(bot):
-    bot.add_cog(FromYoutube(bot, kiri.online_message))
+async def setup(bot):
+    await bot.add_cog(FromYoutube(bot))
