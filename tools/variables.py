@@ -4,7 +4,7 @@ from discord.embeds import Embed
 loaded_ext = list()
 
 online_message = "Salut mon pote !"
-ver_num = "2.1.0"
+ver_num = "2.1.2"
 
 # Fonction pour obtenir les modules chargés
 def get_modules() -> list():

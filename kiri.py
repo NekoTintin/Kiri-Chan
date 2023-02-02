@@ -16,14 +16,18 @@ online_message = var.online_message
 # Charge les intents par défaut
 intents = discord.Intents.default()
 intents.message_content = True
-bot = commands.Bot(command_prefix="-", help_command=None, intents=intents)
+bot = commands.Bot(command_prefix="-", owner_ids= set(pwrd.owner), help_command=None, intents=intents)
 
 @bot.command()
 async def main(bot):
     async with bot:
         for filename in os.listdir("/home/Tintin/discord_bot/Kiri-chan/cogs/"):
-            if filename.endswith(".py") and filename != "reddit2.py":
+            if filename.endswith(".py"):
                 await bot.load_extension(f"cogs.{filename[:-3]}")
+                var.add_module(filename[:-3])
+        for filename in os.listdir("/home/Tintin/discord_bot/Kiri-chan/rpg_cogs/"):
+            if filename.endswith(".py"):
+                await bot.load_extension(f"rpg_cogs.{filename[:-3]}")
                 var.add_module(filename[:-3])
         await bot.start(pwrd.bot_token)
         

@@ -36,7 +36,7 @@ class Begin(commands.Cog):
         await ctx.message.delete()
         await self.bot.load_extension(f"cogs.{extention}")
         var.add_module(extention)
-        await ctx.send(f"Le module {extention} à bien été chargé")
+        await ctx.send(f"Le module {extention} a bien été chargé")
         
     # Permet de décharger un cog
     @commands.command(name="unload")
@@ -44,7 +44,7 @@ class Begin(commands.Cog):
         await ctx.message.delete()
         await self.bot.unload_extension(f"cogs.{extention}")
         var.remove_module(extention)
-        await ctx.send(f"Le module {extention} à bien été déchargé")
+        await ctx.send(f"Le module {extention} a bien été déchargé")
         
     # Permet de recharger un cog
     @commands.command(name="reload")
@@ -52,19 +52,15 @@ class Begin(commands.Cog):
         await ctx.message.delete()
         await self.bot.unload_extension(f"cogs.{extention}")
         await self.bot.load_extension(f"cogs.{extention}")
-        await ctx.send(f"Le module {extention} à bien été rechargé")
+        await ctx.send(f"Le module {extention} a bien été rechargé")
         
     # Envoie un message avec la liste des modules chargés
     @commands.command(name="modules", aliases=['mod'])
     async def modules(self, ctx):
         message = f"Liste des modules chargés:\n"
         for mod in var.get_modules():
-            message += f"- *{mod}*\n"
+            message += f"- **{mod}**\n"
         await ctx.send(message)
-        
-    @commands.command(name="_-")
-    async def com(self, ctx):
-        await ctx.send("Ratio")
         
     # Se déclenche à chaque message
     @commands.Cog.listener()
@@ -73,7 +69,7 @@ class Begin(commands.Cog):
         if message.author == self.bot.user:
             return
         if self.bot.user.mentioned_in(message) and message.mention_everyone == False:
-            await message.channel.send(f"Hey {message.author.mention}, utilise **-help** pour afficher la liste des commandes.")
+            await message.channel.send(f"Hey {message.author.mention}, utilise **/help** pour afficher la liste des commandes.")
             
         if msg_str == "":
             content = "[image]" 
@@ -97,34 +93,11 @@ class Begin(commands.Cog):
         if message.channel.id == 935514239035142164:
             await message.delete()
             
-        
-    
-    # Affichage de la liste des commandes
-    # Commande générale
-    @commands.command(name="help", aliases=["aide"])
-    async def aide(self, ctx):
-        await ctx.message.delete()
-        await ctx.send(embed=get_help(var.get_modules()))
-        
-def get_help(mod):
-  embedMsg = Embed(title="Liste des commandes", description="Liste de toutes les catégories", color=0xffffff)
-  
-  if "reddit" in mod:
-    embedMsg.add_field(name="<:reddit:794069835138596886> Reddit", value="-helpReddit", inline=False)
-  if "youtube" in mod: 
-    embedMsg.add_field(name="<:youtube:316620060221374466> Youtube", value="-helpYoutube", inline=False)
-  if "twitter" in mod: 
-    embedMsg.add_field(name="<a:Twitter:945123022329741332> Twitter", value="-helpTwitter", inline=False)
-  if "booru" in mod: 
-    embedMsg.add_field(name=":desktop: Booru", value="-helpBooru", inline=False)
-  if "features" in mod:
-    embedMsg.add_field(name=":robot: Features", value="-helpFeatures", inline=False)
-  if "tools" in mod:
-    embedMsg.add_field(name=":screwdriver: Outils", value="-helpTools", inline=False)
-  if "admin" in mod:
-    embedMsg.add_field(name="<:Modo:945135154131791912> Administratif", value="-helpAdmin", inline=False)
-
-  return embedMsg
+    # Pour synchroniser les commandes slash
+    @commands.command()
+    async def sync(self, ctx) -> None:
+        fmt = await ctx.bot.tree.sync()
+        await ctx.send(f"{len(fmt)} commandes ont été synchronisées.")
         
 async def setup(bot):
     await bot.add_cog(Begin(bot))
