@@ -1,0 +1,47 @@
+# Biblio de Discord
+import discord
+from discord.ext import commands
+from discord.embeds import Embed
+# Module du bot
+from tools import passwords
+# Module Tweepy
+import tweepy as tpy
+
+
+tw_api_key = passwords.tw_api_key
+tw_secret_key = passwords.tw_secret_key
+tw_access_token = passwords.tw_access_token
+tw_secret_token = passwords.tw_secret_token
+
+auth = tpy.OAuthHandler(tw_api_key, tw_secret_key)
+auth.set_access_token(tw_access_token, tw_secret_token)
+
+api = tpy.API(auth)
+
+class Twitter(commands.Cog):
+    
+    # Méthode d'initialisation de la classe (avec bot an argument).
+    def __init__(self, bot):
+        self.bot = bot
+        
+    # Tweet le message msg avec le compte avec le compte @Kirlia-Chan
+    @commands.command(name="tweet")
+    async def tweet(self, ctx, *msg):
+        await ctx.message.delete()
+        if ctx.message.author == 443113150599004161:
+            message = ' '.join(msg)
+            api.update_status(message)
+        
+    # Affiche la timeline du compte @Kirlia-Chan
+    @commands.command(name="timeline", aliases=["tl"])
+    async def tl(self, ctx):
+        timeline = get_timeline()
+        embed = discord.Embed(title="Timeline", color=0x1a8cd8)
+        for user, content in timeline.items():
+            embed.add_field(name=f"Tweet de {user}", value=content, inline=False)
+
+        await ctx.send(embed=embed)
+
+# Fonction pour ajouter le cog
+async def setup(bot):
+    await bot.add_cog(Twitter(bot))

@@ -19,7 +19,6 @@ class Bdsm(commands.Cog):
         
         while not self.bot.is_closed():
             now = dt.datetime.now(IST)
-            print(f"{now}")
             
             if now.hour == 12 and now.strftime('%A') == "Tuesday":
                 await channel.send("https://media.discordapp.net/attachments/969257662246182945/1062388761947803708/unknown-7-1-1.png?width=960&height=480")

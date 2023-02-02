@@ -1,0 +1,10 @@
+# En cours de création
+#from pixivpy3 import *
+
+#api = AppPixivAPI()
+#api.login("")
+
+# Fonction pour ajouter le cog
+async def setup(bot):
+    #bot.add_cog(Features(bot))
+    pass

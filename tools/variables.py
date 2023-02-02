@@ -1,4 +1,4 @@
-from discord.embeds import Embed
+from typing import Literal
 
 # Dictionnaire qui stocke les cogs chargés
 loaded_ext = list()
@@ -19,4 +19,5 @@ def add_module(name):
 def remove_module(name):
     loaded_ext.remove(name)
 
-subreddit_not_found = Embed(title="<:Erreur:945123023546093611> Subreddit introuvable", description="Le subreddit n'existe pas, vérifie que tu ne t'es pas trompé dans le nom.", color=0xff4300)
+# Liste des valeurs pour les commandes
+values = Literal[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 40, 50]
