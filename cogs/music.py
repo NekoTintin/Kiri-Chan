@@ -5,11 +5,6 @@ from discord.ext import commands
 from discord import app_commands
 from discord.ui import View, Button
 
-# Web Scrapping
-from bs4 import BeautifulSoup
-import json
-import requests
-
 # Autres
 from validators import url as test_url
 from requests import get
@@ -39,9 +34,10 @@ def get_video_data(search: str) -> dict():
             infos = vid_data.extract_info(f"ytsearch:{search}", download=False)['entries'][0]
         
         video_info = {"title": infos.get("title", None),
-                          "id": infos.get("id", None),
-                          "url": infos.get("url", None)}
-    return video_info
+                            "id": infos.get("id", None),
+                            "url": infos.get("url", None)}
+        return video_info
+        
 
 class Music_Player(commands.Cog):
     
@@ -73,7 +69,7 @@ class Music_Player(commands.Cog):
         if self.voice == None:
             await channel.connect()
             self.voice: discord.VoiceClient = discord.utils.get(self.bot.voice_clients, guild=guild)
-            
+        
         self.current_url = data["url"]
         
         if self.voice.is_playing():
@@ -126,6 +122,7 @@ class Music_Player(commands.Cog):
             if self.voice.is_playing() == True:
                 self.voice.stop()
             await self.voice.disconnect()
+            self.voice = None
             await interaction.message.delete()
             await interaction.response.send_message("", delete_after=0.01, ephemeral=True)
             

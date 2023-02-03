@@ -1,33 +1,33 @@
-# Importation de bibliothèques
+# Bibliothèques de Discord
 import discord
 from discord.ext import commands
 from discord.embeds import Embed
+from discord import app_commands
+
+# Autres Biblio
 import tools.variables as var
+from typing import Literal
 
 class Admin(commands.Cog):
     
     # Initialisation
     def __init__(self, bot):
         self.bot = bot
+        super().__init__()
     
-    # Delete Messages Function
-    @commands.command(name="deleteMessage", aliases=['dlt', 'deletemessage', 'delete'])
-    async def delete(self, ctx, id):
-        await ctx.message.delete()
-    
-        channel = self.bot.get_channel(ctx.channel.id)
-        message = await channel.fetch_message(int(id))
-        await message.delete()
+    """   
+    # Commande pour gérer le statut du Bot
+    @app_commands.command(name="status", description="Défini le status du Bot.")
+    async def statut(self, interaction: discord.Interaction, statut: Literal["En ligne", "Absent", "Ne pas déranger", "Invisible"], activité: Literal["Joue à", "Écoute", "Regarde"], message: str):
+        status_state = {"En ligne": discord.Status.online, "Absent": discord.Status.idle, "Ne pas déranger": discord.Status.dnd, "Invisible": discord.Status.invisible}
+        activity_state = {"Joue à": discord.Game(name=message), "Écoute": discord.Activity(type=discord.ActivityType.listening, name=message), "Regarde": discord.Activity(type=discord.ActivityType.watching, name=message)}
         
-    # Shutdown the bot
-    @commands.command(name="shutdown", aliases=['sd'])
-    async def shutdown(self, ctx):
-        await ctx.message.delete()
         try:
-            await ctx.voice_client.disconnect()
+            await self.bot.change_presence(statut=status_state[statut], activity=activity_state[activité])
         except:
-            pass
-        await self.bot.logout()
+            await interaction.response.send_message("No", delete_after=5)
+            return
+        await interaction.response.send_message("yes", delete_after=5)
 
     @commands.command(name="online")
     async def online(self, ctx, activity="watch", *msg):
@@ -78,24 +78,8 @@ class Admin(commands.Cog):
     async def invisible(self, ctx):
         await ctx.message.delete()
         await self.bot.change_presence(status=discord.Status.invisible)
-        
-    # Aide pour les commandes Admin
-    @commands.command(name="helpAdministratif", aliases=["helpAdmin", "helpadmin"])
-    async def aideAdmin(self, ctx):
-        await ctx.message.delete()
-        await ctx.send(embed=get_help_admin())
-        
-def get_help_admin():
-  embedMsg = Embed(title="<:Modo:945135154131791912> Administratif", description="Liste des commandes uniquement pour les modérateurs", color=0xff00fa)
-  #embedMsg.add_field(name="-mpSet [ID utilisateur]", value="Permet de définir à qui j'envoie le Message Privé")
-  #embedMsg.add_field(name="-mp [contenu du message]", value="J'envoie le contenu de ton message")
-  embedMsg.add_field(name="-online [type] [message]", value="Je suis connectée")
-  embedMsg.add_field(name="-idle [type] [message]", value="Je deviens inactive")
-  embedMsg.add_field(name="-dnd [type] [message]", value="Ne me dérange pas")
-  embedMsg.add_field(name="-invisible", value="Mais t'es pas là, mais t'es où ?")
-  embedMsg.add_field(name="-shutdown", value="Arrêt du bot")
+    """
 
-  return embedMsg
         
 async def setup(bot):
     await bot.add_cog(Admin(bot))
