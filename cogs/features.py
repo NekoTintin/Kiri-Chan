@@ -1,7 +1,6 @@
 # -- coding: utf-8 --
 # Biblio de Discord
 import discord
-from discord.embeds import Embed
 from discord.ext import commands
 from discord import app_commands
 # Autres biblio
@@ -9,9 +8,9 @@ from datetime import datetime
 from pytz import timezone
 from random import randint
 
-class Features(commands.Cog):
+class Features(commands.GroupCog, name="features"):
     
-    # Méthode d'initialisation de la classe (avec bot an argument).
+    # Méthode d'initialisation de la classe (avec bot en argument).
     def __init__(self, bot):
         self.bot = bot
         super().__init__()

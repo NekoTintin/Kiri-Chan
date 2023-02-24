@@ -12,7 +12,7 @@ from tools.variables import values
 dan = Danbooru('danbooru', username="Kiri-chan27", api_key=danbooru_api)
 safe = Danbooru('safebooru', username="Kiri-chan27", api_key=danbooru_api)
 
-class Pybooru(commands.Cog):
+class Pybooru(commands.GroupCog, name="pybooru"):
     
     def __init__(self, bot) -> None:
         self.bot = bot
@@ -43,10 +43,8 @@ class Pybooru(commands.Cog):
         if errors > 0:
             await interaction.followup.send(f"Nombre d'images qui n'ont pas pu être affichées: {errors}.", ephemeral=True)
             
-    @app_commands.command(name="danbooru", description="Recherche une image depuis le site Danbooru.")
+    @app_commands.command(name="danbooru", description="Recherche une image depuis le site Danbooru.", nsfw=True)
     async def search_danbooru(self, interaction: discord.Interaction, nombre: values, tags: str):
-        if not interaction.channel.is_nsfw():
-            return await interaction.response.send_message("Cette commande est reservée à un salon NSFW.", ephemeral=True)
         await interaction.response.defer(ephemeral=False)
         
         errors = 0
