@@ -1,6 +1,6 @@
 __pycache__
-hist.html
 history.txt
 tools/passwords.py
-data/screen.png
+images/
+cogs/cece.py
 .gitignore

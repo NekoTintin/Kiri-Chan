@@ -1,10 +1,12 @@
 from typing import Literal
+from secrets import token_hex
+from discord import Color
 
 # Dictionnaire qui stocke les cogs chargés
 loaded_ext = list()
 
-online_message = "Salut mon pote !"
-ver_num = "2.1.3"
+online_message = "Enfin en version 3.0 !"
+ver_num = "3.0.0"
 
 # Fonction pour obtenir les modules chargés
 def get_modules() -> list():
@@ -22,40 +24,44 @@ def remove_module(name):
 # Liste des valeurs pour les commandes
 values = Literal[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 40, 50]
 
+# Sites bannis
+ban_domain = ["spotify", "deezer", "PornHub", "youporn"]
+
 sites_dict = {
-    "dailymotion.com": {
-        "thumbnail_url": "https://www.dailymotion.com/thumbnail/video/vid_id",
+    "dailymotion": {
         "icon_url": "https://upload.wikimedia.org/wikipedia/commons/2/27/Logo_dailymotion.png",
-        "color": 0x00bff9
+        "color": 0x00bff9,
+        "message": None
     },
-    "deezer.com": {
-        "thumbnail_url": "",
-        "icon_url": "http://store-images.s-microsoft.com/image/apps.10845.13510798886741797.23acf55e-f23e-46de-a8cf-654b578e5620.e6cbedec-19c0-4caa-be7d-5e54baa2ec71",
-        "color": 0xffffff
-    },
-    "soundcloud.com": {
-        "thumbnail_url": "https://dreamityourselfmusician.com/wp-content/uploads/2022/01/soundcloud.png",
+    "soundcloud": {
         "icon_url": "https://play-lh.googleusercontent.com/lvYCdrPNFU0Ar_lXln3JShoE-NaYF_V-DNlp4eLRZhUVkj00wAseSIm-60OoCKznpw=w240-h480",
-        "color": 0xff6800
+        "color": 0xff6800,
+        "message": None
     },
-    "tiktok.com": {
-        "thumbnail_url": "https://c0.lestechnophiles.com/www.numerama.com/wp-content/uploads/2018/11/tik-tok-680x383.jpg?resize=500,281&key=86eeaf48",
+    "tiktok": {
         "icon_url": "https://cdn.pixabay.com/photo/2021/06/15/12/28/tiktok-6338432_960_720.png",
-        "color": 0xee1d52
+        "color": 0xee1d52,
+        "message": None
     },
-    "twitch.com": {
-        "thumbnail_url": "https://static.latribune.fr/1780917/twitch.jpg",
+    "twitch": {
         "icon_url": "https://pbs.twimg.com/profile_images/1290231731056971776/67hU0Sgv_400x400.png",
-        "color": 0x9146ff
+        "color": 0x9146ff,
+        "message": None
     },
-    "twitter.com": {
-        "thumbnail_url": "https://pic.clubic.com/v1/images/1941993/raw",
+    "twitter": {
         "icon_url": "https://e7.pngegg.com/pngimages/804/985/png-clipart-social-media-logo-computer-icons-information-twitter-logo-media.png",
-        "color": 0x05acf0
+        "color": 0x05acf0,
+        "message": None
     },
-    "youtube.com": {
-        "thumbnail_url": "https://i3.ytimg.com/vi/vid_id/maxresdefault.jpg",
+    "youtube": {
         "icon_url": "https://upload.wikimedia.org/wikipedia/commons/f/f4/Youtube-logo-red.png",
-        "color": 0xfe0000
+        "color": 0xfe0000,
+        "message": None
+    },
+    "générique": {
+        "thumbnail": "https://images.frandroid.com/wp-content/uploads/2018/08/guide-apps-video-android.jpg",
+        "icon_url": "https://cdn0.iconfinder.com/data/icons/basic-uses-symbol-vol-2/100/Help_Need_Suggestion_Question_Unknown-512.png",
+        "color": Color.from_str(f"#{token_hex(3)}"),
+        "message": None
     }
 }

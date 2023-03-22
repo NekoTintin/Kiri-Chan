@@ -4,6 +4,7 @@ from discord.embeds import Embed
 from discord import app_commands, ui
 from datetime import datetime
 from random import choice, randint
+from secrets import SystemRandom
 import sqlite3
 from sqlite3 import Error
 
@@ -11,12 +12,12 @@ user_list = [592750256899489825, 443113150599004161, 682217361092378671]
 example_name = ["Jean le Ragondin", "Kot1 Le Faux", "Jean-Bernard de la Sainte Famille du Compté de...", "Truc", "Bernard Minet"]
 
 """
-        self.identifiant = 592750256899489825
-        self.name = "KOR1, THE SYMPATHIQUE DICTATOR !!!!"
-        self.max_hp = 9999
-        self.atk = 0.5
-        self.defense = 0.69
-        self.max_mp = 9999
+    self.identifiant = 592750256899489825
+    self.name = "KOR1, THE SYMPATHIQUE DICTATOR !!!!"
+    self.max_hp = 9999
+    self.atk = 0.5
+    self.defense = 0.69
+    self.max_mp = 9999
 """
 
 class Character_Modal(ui.Modal, title="C'est l'heure de créer ton PERSONNAGE !!!"):
@@ -35,13 +36,13 @@ class Character_Modal(ui.Modal, title="C'est l'heure de créer ton PERSONNAGE !!
         
         await interaction.response.send_message("Ton personnage a bien été créé !")
         
-
 class Rpg(commands.GroupCog, name="rpg"):
     
     def __init__(self, bot) -> None:
         self.bot = bot
         super().__init__()
-        
+    
+    @app_commands.guilds(759147102093049876)
     @app_commands.command(name="create", description="Crée ton personnage pour démarrer ton aventure.")
     async def create_character(self, interaction: discord.Interaction):
         if interaction.user.id not in user_list:
@@ -55,7 +56,8 @@ class Rpg(commands.GroupCog, name="rpg"):
         else:
             await interaction.response.send_message(content="Tu as déjà un personnage, pas la peine d'en créer un nouveau !", ephemeral=True)
         database.close()
-        
+    
+    @app_commands.guilds(759147102093049876)
     @app_commands.command(name="stats", description="Consulte les statistiques de ton personnage.")
     async def stat(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)

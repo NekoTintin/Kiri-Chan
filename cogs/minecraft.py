@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 
+@commands.guild_only()
 class Minecraft(commands.Cog, name="Minecraft module"):
     def __init__(self, bot):
         self.bot = bot

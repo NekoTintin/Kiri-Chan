@@ -1,4 +1,3 @@
-import discord
 from discord.ext import commands
 
 import asyncio
@@ -36,6 +35,7 @@ class Bdsm(commands.Cog):
             if now.hour == 3:
                 await channel.send(content=f"{user.mention}")
                 
+            await asyncio.sleep(3600)
             await asyncio.sleep(3600)
     
 async def setup(bot):

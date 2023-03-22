@@ -18,7 +18,7 @@ class Features(commands.GroupCog, name="features"):
     # Pourquoi ? Parce que !
     @app_commands.command(name="poyo", description="Poyo !")
     async def poyo(self, interaction: discord.Interaction):
-        await interaction.response.send_message("POYO !!!", ephemeral=True)
+        await interaction.response.send_message("https://static.wikia.nocookie.net/756ff310-a849-484c-871e-c78e742eb0b0/scale-to-width/1024", ephemeral=True)
         
     # Affiche le jour et l'heure
     @app_commands.command(name="datetime", description="Affiche le Jour et l'Heure actuel.")

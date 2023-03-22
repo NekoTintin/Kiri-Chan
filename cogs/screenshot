@@ -3,21 +3,29 @@ from discord.ext import commands
 from discord import app_commands
 
 import chat_exporter
-from html2image import Html2Image
+import imgkit
 
+@app_commands.guild_only()
 class Screenshot(commands.Cog):
     
     def __init__(self, bot) -> None:
         self.bot = bot
         super().__init__()
         
-    @app_commands.command(name="screenshot", description="desc")
+    @app_commands.command(name="screenshot", description="Affiche les derniers messages dans une image.")
     async def screen(self, interaction: discord.Interaction, nombre: int=1):
         if nombre <= 0:
             await interaction.response.send_message("Le nombre de message doit être supérieur à 0.", ephemeral=True)
+        elif nombre >= 25:
+            await interaction.response.send_message("Le nombre de message doit être inférieur à 26.", ephemeral=True)
         
         await interaction.response.defer(ephemeral=False)
         msg_hist = await chat_exporter.export(interaction.channel, limit=nombre, bot=self.bot)
+
+        with open('hist.html', 'wb') as hist_file:
+            hist_file.write(msg_hist.encode())
+
+        imgkit.from_file("hist.html", "out.jpg")
         
         
         

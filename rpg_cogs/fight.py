@@ -27,6 +27,8 @@ class Fight(commands.Cog):
         await interaction.followup.send("SEXSEAL a perdu parce qu'il est inintéressant.")
     """
     
+    @app_commands.guild_only()
+    @app_commands.guilds(759147102093049876)
     @app_commands.command(name="fight", description="C'est l'heure de la bagarre !")
     async def fight(self, interaction: discord.Interaction, adversaire: discord.User):
         await interaction.response.defer()
