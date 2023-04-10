@@ -4,3 +4,5 @@ tools/passwords.py
 images/
 cogs/cece.py
 .gitignore
+.vscode
+data

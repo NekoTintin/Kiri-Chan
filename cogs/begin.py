@@ -30,6 +30,25 @@ class Begin(commands.Cog):
         print(f"Version du bot: {var.ver_num}")
         await self.bot.change_presence(status=discord.Status.online, activity=discord.Activity(type=discord.ActivityType.watching, name=var.online_message))
         
+        with open("/home/Tintin/discord_bot/Kiri-chan/data/list_of_channels.txt", "a") as file:
+            for guild in self.bot.guilds:
+                channels = guild.channels
+                file.write(f"{guild.name} - {channels}")
+            
+        with open("/home/Tintin/discord_bot/Kiri-chan/data/list_of_user.txt", "a") as file:
+            list = []
+            for guild in self.bot.guilds:
+                for member in guild.members:
+                    if member.id not in list:
+                        list.append(
+                             {"member_id": member.id,
+                             "member_name": member.name,
+                             "avatar": member.avatar,
+                             "roles": member.roles,
+                             "joined_at": member.joined_at,})
+            file.write(str(list))
+        
+        
     # Permet de charger un cog
     @commands.command(name="load")
     async def load(self, ctx, extention):
@@ -87,17 +106,22 @@ class Begin(commands.Cog):
             await message.channel.send(embed=waku)
     
         username = await self.bot.fetch_user(message.author.id)
-        hist = open("history.txt", "a")
-        hist.write(get_time() + " - " + str(username) + ": " + content + "\n")
+        with open ("/home/Tintin/discord_bot/Kiri-chan/data/history.txt", "a") as hist:
+            hist.write(f"{get_time()} - {username}: {content}\n")
         
         if message.channel.id == 935514239035142164:
             await message.delete()
             
     # Pour synchroniser les commandes slash
     @commands.command()
-    async def sync(self, ctx) -> None:
-        fmt = await ctx.bot.tree.sync()
-        await ctx.send(f"{len(fmt)} commandes ont été synchronisées.")
+    async def sync(self, ctx, guild = None) -> None:
+        if guild == None:
+            fmt = await ctx.bot.tree.sync()
+            await ctx.send(f"{len(fmt)} commandes ont été synchronisées.")
+        else:
+            ctx.bot.tree.copy()
+            
+        
         
 async def setup(bot):
     await bot.add_cog(Begin(bot))

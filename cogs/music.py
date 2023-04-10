@@ -9,8 +9,14 @@ from discord.ui import View, Button
 from validators import url as test_url
 import yt_dlp as music
 from tools.variables import sites_dict, online_message, ban_domain
+import tools.formats as formats
 import pyshorteners
+from typing import Literal
 
+# Pour le téléchargement
+format_list = Literal["mp3", "ogg", "wav", "m4a"]
+
+# Pour la lecture en streaming
 ffmpeg_opts = {'options': '-vn'}
 before_options = '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5'
 
@@ -312,7 +318,11 @@ class Music(commands.GroupCog, name="music"):
         
         await react.response.defer(thinking=False)
         current_player = self.dict_of_player[guild.id]
-        list_of_music = await current_player.get_playlist()"""
+        list_of_music = await current_player.get_playlist()
+        
+    @app_commands.command(name="download", description="Télécharge depuis un lien vers convertis le fichier.")
+    async def _download(self, react: discord.Interaction, flux: str, format: format_list):
+        pass"""
     
 async def setup(bot):
     await bot.add_cog(Music(bot))

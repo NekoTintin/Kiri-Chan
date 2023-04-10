@@ -3,7 +3,8 @@ from discord.ext import commands
 from discord import app_commands
 
 import chat_exporter
-import imgkit
+from html2image import Html2Image
+from PIL import Image
 
 @app_commands.guild_only()
 class Screenshot(commands.Cog):
@@ -11,45 +12,28 @@ class Screenshot(commands.Cog):
     def __init__(self, bot) -> None:
         self.bot = bot
         super().__init__()
-        
+    
     @app_commands.command(name="screenshot", description="Affiche les derniers messages dans une image.")
-    async def screen(self, interaction: discord.Interaction, nombre: int=1):
+    async def screen(self, interaction: discord.Interaction, nombre: int=2):
         if nombre <= 0:
-            await interaction.response.send_message("Le nombre de message doit être supérieur à 0.", ephemeral=True)
+            return await interaction.response.send_message("Le nombre de message doit être supérieur à 0.", ephemeral=True)
         elif nombre >= 25:
-            await interaction.response.send_message("Le nombre de message doit être inférieur à 26.", ephemeral=True)
+            return await interaction.response.send_message("Le nombre de message doit être inférieur à 26.", ephemeral=True)
         
-        await interaction.response.defer(ephemeral=False)
-        msg_hist = await chat_exporter.export(interaction.channel, limit=nombre, bot=self.bot)
+        await interaction.response.defer(thinking=False, ephemeral=False)
+        
+        msg_hist = await chat_exporter.export(
+            interaction.channel,
+            limit=nombre,
+            bot=self.bot)
 
         with open('hist.html', 'wb') as hist_file:
             hist_file.write(msg_hist.encode())
 
-        imgkit.from_file("hist.html", "out.jpg")
-        
-        
-        
-    """
-    @commands.command(name="screenshot", aliases=["Screenshot", "screen", "Screen"])
-    async def screen(self, ctx, num: int=1):
-        await ctx.message.delete()
-        hist = await chat_exporter.export(
-            ctx.channel,
-            limit = num,
-            bot = self.bot)
-        message = await ctx.send("<a:search:944484192018903060> Création en cours...")
-        if hist is None:
-            return
-        
-        with open('hist.html', 'wb') as hist_file:
-            hist_file.write(hist.encode())
-        
         hti = Html2Image(output_path='/home/Tintin/discord_bot/Kiri-chan/')
-        hti.screenshot(html_file='hist.html', save_as='screen.png')
+        hti.screenshot(html_file='hist.html', save_as='screen.png', size=(750, 5000))
         
-        await message.delete()
-        await ctx.send(file=discord.File("screen.png"))
-    """
+        await interaction.followup.send()
         
         
 async def setup(bot):
