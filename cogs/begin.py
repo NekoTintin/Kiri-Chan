@@ -88,7 +88,7 @@ class Begin(commands.Cog):
         if message.author == self.bot.user:
             return
         if self.bot.user.mentioned_in(message) and message.mention_everyone == False:
-            await message.channel.send(f"Hey {message.author.mention}, utilise **/help** pour afficher la liste des commandes.")
+            await message.channel.send(f"Hey {message.author.mention}, utilise **/** pour afficher la liste des commandes.")
             
         if msg_str == "":
             content = "[image]" 

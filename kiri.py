@@ -4,9 +4,11 @@ import asyncio
 from discord.ext import commands
 from discord import app_commands
 from discord.embeds import Embed
-# Bibliothèques pour Linux
+# Bibliothèques
 import os
 import sqlite3
+from secrets import token_hex
+from validators import url as test_url
 # Modules avec tous les mots de passe [que vous ne pouvez pas voir :)].
 import tools.passwords as pwrd
 import tools.variables as var
@@ -141,6 +143,41 @@ bot.tree.add_command(view_social_credit)
 bot.tree.add_command(credit_menu)
 """
 
+async def _multipost(react: discord.Interaction, msg: discord.Message):
+    options = list()
+    for guild in bot.guilds:
+        if react.user not in guild.members:
+            break
+        for channel in guild.channels:
+            if any(word in channel.name.lower() for word in var.keywords) and react.channel_id != channel.id:
+                options.append(discord.SelectOption(
+                    label=channel.name,
+                    description=f"Dans le serveur: {guild.name}",
+                    value=f'{channel.id}',))
+
+    select_menu = discord.ui.Select(options=options, placeholder="Choisis le(s) salon(s).", min_values=1, max_values=len(options))
+
+    async def callback(react):
+        await react.response.defer(ephemeral=True)
+        for val in select_menu.values:
+            emb = Embed(title=msg.content, color=discord.Color.from_str(f'#{token_hex(3)}'))
+            if msg.attachments != []:
+                emb.set_image(url=msg.attachments[0].url)
+            elif test_url(msg.content):
+                emb.set_image(url=msg.content)
+            emb.set_author(name=msg.author.name, icon_url=msg.author.avatar.url)
+            emb.set_footer(text=f"Depuis {bot.user.display_name} via la commande multipost.", icon_url=bot.user.avatar.url)
+            await bot.get_channel(int(val)).send(embed=emb)
+        await react.followup.send(content="Tout a été envoyé !", ephemeral=True)
+
+    select_menu.callback = callback
+    v = discord.ui.View()
+    v.add_item(select_menu)
+    await react.response.send_message(view=v, delete_after=180, ephemeral=True, allowed_mentions=False)
+
+
+message_menu = app_commands.ContextMenu(name="Publier sur d'autres serveurs", callback=_multipost)
+bot.tree.add_command(message_menu)
 
 # Démarre le bot
 asyncio.run(main(bot))

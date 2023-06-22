@@ -30,7 +30,8 @@ class Tools(commands.GroupCog, name="tools"):
     async def git(self, interaction: discord.Interaction):
         message = Embed(title="Lien du GitHub:", color=0xfbfcfc).add_field(name="Repo de Kiri-Chan:", value="https://github.com/Tintin361/Kiri-chan")\
         .add_field(name="Repo de Little Kyubey", value="https://github.com/Tintin361/Lil_Kyubey")\
-        .add_field(name="Repo de NekoBot", value="https://github.com/Tintin361/NekoBot")
+        .add_field(name="Repo de NekoBot", value="https://github.com/Tintin361/NekoBot")\
+        .add_field(name="Repo de VeemoBot", value="https://github.com/Tintin361/VeemoBot")
         await interaction.response.send_message(embed=message, ephemeral=True)
 
 # Fonction pour ajouter le cog

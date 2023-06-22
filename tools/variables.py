@@ -5,8 +5,8 @@ from discord import Color
 # Dictionnaire qui stocke les cogs chargés
 loaded_ext = list()
 
-online_message = "Lumalee est le meileur perso du film Mario"
-ver_num = "3.1.0"
+online_message = "toujours plus de vidéos sur Youtube"
+ver_num = "3.2.0"
 
 # Fonction pour obtenir les modules chargés
 def get_modules() -> list():
@@ -65,3 +65,5 @@ sites_dict = {
         "message": None
     }
 }
+
+keywords = ["général", "meme", "accueil", "seal-zone", "bienvenue"]

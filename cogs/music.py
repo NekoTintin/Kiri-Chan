@@ -77,10 +77,10 @@ def time_convert(time) -> str():
             return "Diffusion en direct"
     return time
 
-def create_embed(data: dict(), title: str(), channel: str(), list_id: int(), list_max: int()) -> Embed():
+def create_embed(data: dict(), title: str(), channel: str(), list_id: int(), list_max: int(), bot_name: str) -> Embed():
     list_id += 1
 
-    emb = Embed(title=f"[{list_id}/{list_max}] **{title}**", description=f"Kirlia-chan en cours de lecture dans 🔊 **{channel}**.",
+    emb = Embed(title=f"[{list_id}/{list_max}] **{title}**", description=f"***{bot_name}*** en cours de lecture dans 🔊 **{channel}**.",
                 color=sites_dict[data["extractor"]]["color"])
     emb.set_image(url=data["thumbnail"])
     emb.set_footer(text=f"Depuis {data['extractor'].capitalize()} - ID: {data['id']} - Durée: {time_convert(data['duration'])}",
@@ -116,7 +116,7 @@ class Player():
         if playing_mode:
             self.video_data = get_video_data(self.list[self.list_id]['video_url'])
             self.video_url = self.video_data['url']
-            self.message_embed = create_embed(self.video_data, self.list[self.list_id]['video_title'], self.channel_name, self.list_id, self.list_max)
+            self.message_embed = create_embed(self.video_data, self.list[self.list_id]['video_title'], self.channel_name, self.list_id, self.list_max, self.bot.user.display_name)
             self.message_view = await self.create_view(self.video_data['is_live'])
             await self.set_status(self.list[self.list_id]['video_title'])
 
@@ -127,15 +127,29 @@ class Player():
         if title == None:
             return await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=online_message))
         await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name=title))
-    
+
     # Retourne une view avec les boutons de lecture
     async def create_view(self, is_live: bool) -> View:
         view = View(timeout=None)
 
         play_button = Button(label="Pause", style=discord.ButtonStyle.primary, emoji="⏸️", row=0)
+        add_button = Button(label="Ajouter", style=discord.ButtonStyle.primary, emoji="➕", row=0)
         stop_button = Button(label="Stop", style=discord.ButtonStyle.danger, emoji="⏹️", row=0)
-        disc_button = Button(label="Déconnexion", style=discord.ButtonStyle.danger, emoji="❎", row=0)
         
+        disc_button = Button(label="Déconnexion", style=discord.ButtonStyle.danger, emoji="❎", row=1)
+        rewi_button = Button(label="Rembobiner", style=discord.ButtonStyle.primary, emoji="⏪", row=1)
+        
+        async def add_to_playlist(data) -> None:
+            for video in data:
+                self.list.append(video)
+            self.list_max = len(self.list)
+
+        async def change_embed() -> Embed and View:
+            self.message_embed = create_embed(self.video_data, self.list[self.list_id]['video_title'], self.channel_name, self.list_id, self.list_max, self.bot.user.display_name)
+            self.message_view = await self.create_view(self.video_data['is_live'])
+
+            return self.message_embed, self.message_view
+
         # Fonctions des Boutons
         async def resume(react: discord.Interaction):
             await react.response.defer(thinking=False)
@@ -153,7 +167,25 @@ class Player():
             await react.response.defer(thinking=False)
             await self.audio_play()
             await react.message.delete()
+            
+        async def add_music(react: discord.Interaction):
+            class Add_Modal(discord.ui.Modal, title="Ajouter un lien ou une recherche."):
+                link = discord.ui.TextInput(label="Entre ton lien ou ta recherche ici.",
+                    style=discord.TextStyle.short,
+                    placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                    required=True)
+    
+                async def on_submit(self, react: discord.Interaction) -> None:
+                    await react.response.defer(thinking=False, ephemeral=True)
+                    await add_to_playlist(get_video_list(self.link.value))
+                    await react.message.edit(suppress=True)
 
+                    message_embed, message_view = await change_embed()
+                    await react.message.edit(embed=message_embed, view=message_view)
+
+            
+            await react.response.send_modal(Add_Modal())
+            
         async def disconnect(react: discord.Interaction):
             await react.response.defer(thinking=False)
             await self.audio_play()
@@ -162,6 +194,9 @@ class Player():
             await react.message.delete()
             self.voice = None
         
+        async def rewind(react: discord.Interaction):
+            await react.response.defer(thinking=False)
+            await self.audio_play(playing_mode=True) 
 
         async def backward(react: discord.Interaction):
             await react.response.defer(thinking=False)
@@ -179,13 +214,14 @@ class Player():
             await react.message.edit(suppress=True)
             await react.message.edit(embed=self.message_embed, view=self.message_view)
         
+        #link_button = Button(label="Lien", style=discord.ButtonStyle.link, row=3, url=self.video_url)
         if not is_live:
-            back_button = Button(label="Précédente", style=discord.ButtonStyle.primary, emoji="⏮️", row=1)
-            forw_button = Button(label="Suivante", style=discord.ButtonStyle.primary, emoji="⏭️", row=1)
+            back_button = Button(label="Précédente", style=discord.ButtonStyle.primary, emoji="⏮️", row=2)
+            forw_button = Button(label="Suivante", style=discord.ButtonStyle.primary, emoji="⏭️", row=2)
 
             short = pyshorteners.Shortener()
             short_url = short.tinyurl.short(self.video_url)
-            down_button = Button(label="Télécharger", style=discord.ButtonStyle.link, url=short_url, row=1)
+            down_button = Button(label="Télécharger", style=discord.ButtonStyle.link, url=short_url, row=3)
 
             back_button.callback = backward
             forw_button.callback = forward
@@ -206,10 +242,15 @@ class Player():
         play_button.callback = resume
         stop_button.callback = stop
         disc_button.callback = disconnect
+        add_button.callback = add_music
+        rewi_button.callback = rewind
         
         view.add_item(play_button)
         view.add_item(stop_button)
         view.add_item(disc_button)
+        view.add_item(add_button)
+        view.add_item(rewi_button)
+        #view.add_item(link_button)
 
         return view
     
@@ -222,23 +263,10 @@ class Player():
                 
         await self.audio_play(playing_mode=True)
         return {"embed": self.message_embed, "view": self.message_view}
-    
-    async def add_music(self, flux: str) -> list():
-        data = get_video_list(flux)
-        for video in data:
-            self.list.append(video)
-        self.list_max = len(self.list)
-        
-        self.message_embed = create_embed(self.video_data, self.list[self.list_id]['video_title'], self.channel_name, self.list_id, self.list_max)
-        self.message_view = await self.create_view(self.video_data['is_live'])
-        
-        return [self.message_embed, self.message_view]
-    
-    #async def get_playlist(self) -> list():
         
 
 @app_commands.guild_only()
-class Music(commands.GroupCog, name="music"):
+class Music(commands.Cog, name="music"):
     
     def __init__(self, bot):
         self.bot = bot
@@ -279,25 +307,6 @@ class Music(commands.GroupCog, name="music"):
         else:
             message = await react.followup.send(embed=message.get("embed"), view=message.get("view"), ephemeral=False)
             self.dict_of_message = {guild.id: message}
-    
-    
-    @app_commands.command(name="add", description="Ajoute une musique à la playlist en cours.")
-    async def _add(self, react: discord.Interaction, flux: str):
-        guild = react.guild
-        voice = discord.utils.get(self.bot.voice_clients, guild=guild)
-        if voice == None:
-            return await react.response.send_message("Je ne pas connectée à un salon vocal", ephemeral=True)
-        
-        await react.response.defer(thinking=False, ephemeral=True)
-        current_player = self.dict_of_player[guild.id]
-        data = await current_player.add_music(flux)
-
-        msg = self.dict_of_message.get(guild.id)
-        await msg.edit(embed=None)
-        await msg.edit(embed=data[0], view=data[1])
-        
-        await react.followup.send("Musique(s) ajoutée(s) à la playlist.", ephemeral=True)
-        
     
     @app_commands.command(name="disconnect", description="Déconnecte le bot.")
     async def _disconnect(self, react: discord.Interaction):
