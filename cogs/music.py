@@ -8,10 +8,11 @@ from discord.ui import View, Button
 # Autres
 from validators import url as test_url
 import yt_dlp as music
-from tools.variables import sites_dict, online_message, ban_domain
+from tools.variables import sites_dict, online_message, ban_domain, gapi
 import tools.formats as formats
 import pyshorteners
 from typing import Literal
+from googleapiclient.discovery import build
 
 # Pour le téléchargement
 format_list = Literal["mp3", "ogg", "wav", "m4a"]
@@ -26,7 +27,9 @@ opts_playlist = {'extract_flat': 'in_playlist'}
 # Options lister les informations d'une vidéo
 opts_video = {'format': 'bestaudio/best', 'postprocessors': [{'key': 'FFmpegExtractAudio', 'preferredcodec': 'm4a'}]}
 
-def get_video_list(search: str()) -> list() or None:
+youtube = build("youtube", "v3", developerKey=gapi)
+
+def get_video_list(search: str) -> list() or None:
     video_list = list()
     with music.YoutubeDL(opts_playlist) as ytdl:
         if test_url(search): # Si search est une URL
@@ -77,27 +80,41 @@ def time_convert(time) -> str():
             return "Diffusion en direct"
     return time
 
-def create_embed(data: dict(), title: str(), channel: str(), list_id: int(), list_max: int(), bot_name: str) -> Embed():
+def create_embed(data: dict, title: str, channel: str, list_id: int, list_max: int, bot_name: str) -> Embed:
     list_id += 1
-
-    emb = Embed(title=f"[{list_id}/{list_max}] **{title}**", description=f"***{bot_name}*** en cours de lecture dans 🔊 **{channel}**.",
-                color=sites_dict[data["extractor"]]["color"])
+    
+    if list_max > 1:
+        embed_title = f"[{list_id}/{list_max}] **{title}**"
+    else:
+        embed_title = f"**{title}**"
+    
+    extractor = sites_dict.get("extractor", sites_dict["générique"])
+    
+    emb = Embed(title=embed_title, description=f"***{bot_name}*** en cours de lecture dans 🔊 **{channel}**.",
+                color=extractor["color"])
     emb.set_image(url=data["thumbnail"])
     emb.set_footer(text=f"Depuis {data['extractor'].capitalize()} - ID: {data['id']} - Durée: {time_convert(data['duration'])}",
-                   icon_url=sites_dict[data["extractor"]]["icon_url"])
-    emb.set_author(name=f"{data['uploader']}", url=data["channel_url"])
-
+                   icon_url=extractor["icon_url"])
+    
+    if data["extractor"] == "youtube":
+        url = data["channel_url"].split("/channel/")[-1]
+        response = youtube.channels().list(part="snippet", id=url).execute()
+        avatar_url = response["items"][0]["snippet"]["thumbnails"]["high"]["url"]
+        emb.set_author(name=f"{data['uploader']}", url=data["channel_url"], icon_url=avatar_url)
+    else:
+        emb.set_author(name=f"{data['uploader']}", url=data["channel_url"])
     return emb
 
 class Player():
     
-    def __init__(self, bot: commands.Bot, voice: discord.VoiceClient, channel_name: str) -> None:
+    def __init__(self, bot: commands.Bot, voice: discord.VoiceClient, channel) -> None:
         # Variables pour le Bot
         self.bot = bot
         self.voice = voice
-        self.channel_name = channel_name
+        self.channel = channel
         self.message_embed = None
         self.message_view = None
+        self.message_id = int
         # Variables pour la list
         self.list = list()
         self.name_list = list()
@@ -116,11 +133,20 @@ class Player():
         if playing_mode:
             self.video_data = get_video_data(self.list[self.list_id]['video_url'])
             self.video_url = self.video_data['url']
-            self.message_embed = create_embed(self.video_data, self.list[self.list_id]['video_title'], self.channel_name, self.list_id, self.list_max, self.bot.user.display_name)
+            self.message_embed = create_embed(self.video_data, self.list[self.list_id]['video_title'], self.channel.name, self.list_id, self.list_max, self.bot.user.display_name)
             self.message_view = await self.create_view(self.video_data['is_live'])
             await self.set_status(self.list[self.list_id]['video_title'])
 
-            self.voice.play(discord.FFmpegOpusAudio(self.video_url, **ffmpeg_opts, before_options=before_options))
+            self.voice.play(discord.FFmpegOpusAudio(self.video_url, **ffmpeg_opts, before_options=before_options))  #, after=lambda error: asyncio.run_coroutine_threadsafe(self.play_next(), self.bot.loop)
+            
+    # Charge la prochaine musique dans le dict
+    async def play_next(self):
+        if not self.list_id + 1 == self.list_max:
+            self.list_id += 1
+            await self.audio_play(playing_mode=True)
+            message = await self.channel.fetch_message(self.message_id)
+            await message.edit(suppress=True)
+            await message.edit(embed=self.message_embed)#, view=self.message_view)
             
     # Change le statut du bot pendant la lecture
     async def set_status(self, title: str) -> None:
@@ -145,7 +171,7 @@ class Player():
             self.list_max = len(self.list)
 
         async def change_embed() -> Embed and View:
-            self.message_embed = create_embed(self.video_data, self.list[self.list_id]['video_title'], self.channel_name, self.list_id, self.list_max, self.bot.user.display_name)
+            self.message_embed = create_embed(self.video_data, self.list[self.list_id]['video_title'], self.channel.name, self.list_id, self.list_max, self.bot.user.display_name)
             self.message_view = await self.create_view(self.video_data['is_live'])
 
             return self.message_embed, self.message_view
@@ -169,7 +195,7 @@ class Player():
             await react.message.delete()
             
         async def add_music(react: discord.Interaction):
-            class Add_Modal(discord.ui.Modal, title="Ajouter un lien ou une recherche."):
+            class Add_Modal(discord.ui.Modal, title="Ajouter un lien ou une recherche"):
                 link = discord.ui.TextInput(label="Entre ton lien ou ta recherche ici.",
                     style=discord.TextStyle.short,
                     placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ",
@@ -182,8 +208,6 @@ class Player():
 
                     message_embed, message_view = await change_embed()
                     await react.message.edit(embed=message_embed, view=message_view)
-
-            
             await react.response.send_modal(Add_Modal())
             
         async def disconnect(react: discord.Interaction):
@@ -193,7 +217,8 @@ class Player():
             await self.voice.disconnect()
             await react.message.delete()
             self.voice = None
-        
+            await self.bot.change_presence(status=discord.Status.online, activity=discord.Activity(type=discord.ActivityType.watching, name=online_message))
+    
         async def rewind(react: discord.Interaction):
             await react.response.defer(thinking=False)
             await self.audio_play(playing_mode=True) 
@@ -214,7 +239,7 @@ class Player():
             await react.message.edit(suppress=True)
             await react.message.edit(embed=self.message_embed, view=self.message_view)
         
-        #link_button = Button(label="Lien", style=discord.ButtonStyle.link, row=3, url=self.video_url)
+        link_button = Button(label="Lien", style=discord.ButtonStyle.link, row=3, url=self.list[self.list_id]["video_url"])
         if not is_live:
             back_button = Button(label="Précédente", style=discord.ButtonStyle.primary, emoji="⏮️", row=2)
             forw_button = Button(label="Suivante", style=discord.ButtonStyle.primary, emoji="⏭️", row=2)
@@ -250,7 +275,7 @@ class Player():
         view.add_item(disc_button)
         view.add_item(add_button)
         view.add_item(rewi_button)
-        #view.add_item(link_button)
+        view.add_item(link_button)
 
         return view
     
@@ -263,29 +288,34 @@ class Player():
                 
         await self.audio_play(playing_mode=True)
         return {"embed": self.message_embed, "view": self.message_view}
-        
+    
+    def set_msg_id(self, id: int):
+        self.message_id = id
 
 @app_commands.guild_only()
 class Music(commands.Cog, name="music"):
     
-    def __init__(self, bot):
+    def __init__(self, bot) -> None:
         self.bot = bot
         self.dict_of_player = dict()
         self.dict_of_message = dict()
         super().__init__()
         
     @app_commands.command(name="play", description="Joue le son d'une vidéo ou d'un live depuis un lien ou une recherche.")
-    async def _play(self, react: discord.Interaction, flux: str):
+    async def _play(self, react: discord.Interaction, flux: str, salon:str=None) -> None:
         await self.bot.wait_until_ready()
         await react.response.defer(ephemeral=False)
         
+        guild = react.guild
         # Vérifie si l'utilisateur est connecté sans un salon vocal 
         try:
             channel = react.user.voice.channel
         except:
-            return await react.followup.send("Connecte-toi à un salon vocal pour jouer de la musique.", ephemeral=True)
+            if salon != None:
+                channel = self.bot.get_channel(int(salon))
+            else:
+                return await react.followup.send("Connecte-toi à un salon vocal pour jouer de la musique.", ephemeral=True)
         
-        guild = react.guild
         voice: discord.VoiceClient = discord.utils.get(self.bot.voice_clients, guild=guild)
         if voice == None:
             await channel.connect()
@@ -295,17 +325,19 @@ class Music(commands.Cog, name="music"):
             
         if self.dict_of_player.get(guild.id, None) != None:
             self.dict_of_player[guild.id] = None
-            current_player = Player(self.bot, voice, channel.name)
+            current_player = Player(self.bot, voice, react.channel)
             self.dict_of_player[guild.id] = current_player
         else:
-            current_player = Player(self.bot, voice, channel.name)
+            current_player = Player(self.bot, voice, react.channel)
             self.dict_of_player[guild.id] = current_player
             
         message = await current_player.play_sound(flux)
         if message.get("content", None) != None:
             return await react.followup.send(content=message.get("content"), ephemeral=False)
         else:
-            message = await react.followup.send(embed=message.get("embed"), view=message.get("view"), ephemeral=False)
+            sended_msg = await react.followup.send(embed=message.get("embed"), view=message.get("view"), ephemeral=False, wait=True)
+            msg2 = await sended_msg.fetch()
+            current_player.set_msg_id(msg2.id)
             self.dict_of_message = {guild.id: message}
     
     @app_commands.command(name="disconnect", description="Déconnecte le bot.")
@@ -316,8 +348,8 @@ class Music(commands.Cog, name="music"):
             return await react.response.send_message("Je ne pas connectée à un salon vocal", ephemeral=True)
         await voice.disconnect()
         await react.response.send_message("Kiri-chan s'est déconnectée.", ephemeral=True)
+        await self.bot.change_presence(status=discord.Status.online, activity=discord.Activity(type=discord.ActivityType.watching, name=online_message))
         
-    
     """@app_commands.command(name="playlist", description="Affiche la playlist en cours.")
     async def _playlist(self, react: discord.Interaction):
         guild = react.guild
@@ -327,11 +359,7 @@ class Music(commands.Cog, name="music"):
         
         await react.response.defer(thinking=False)
         current_player = self.dict_of_player[guild.id]
-        list_of_music = await current_player.get_playlist()
-        
-    @app_commands.command(name="download", description="Télécharge depuis un lien vers convertis le fichier.")
-    async def _download(self, react: discord.Interaction, flux: str, format: format_list):
-        pass"""
+        list_of_music = await current_player.get_playlist()"""
     
 async def setup(bot):
     await bot.add_cog(Music(bot))

@@ -6,7 +6,7 @@ from discord import app_commands
 from discord.embeds import Embed
 # Bibliothèques
 import os
-import sqlite3
+#import sqlite3
 from secrets import token_hex
 from validators import url as test_url
 # Modules avec tous les mots de passe [que vous ne pouvez pas voir :)].
@@ -20,7 +20,7 @@ online_message = var.online_message
 # Charge les intents par défaut
 intents = discord.Intents.all()
 intents.message_content = True
-bot = commands.Bot(command_prefix="-", owner_ids= set(pwrd.owner), help_command=None, intents=intents)
+bot = commands.Bot(command_prefix="-", owner_ids=set(pwrd.owner), help_command=None, intents=intents)
 
 @bot.command()
 async def main(bot):

@@ -31,9 +31,10 @@ class Bdsm(commands.Cog):
         while not self.bot.is_closed():
             now = dt.datetime.now(IST)
             marie = self.bot.get_user(682217361092378671)
+            teuse = self.bot.get_user(897024020615163935)
             
             if now.hour == 3:
-                await channel.send(content=f"{marie.mention}")
+                await channel.send(content=f"{teuse.mention} de {marie.mention} et {marie.mention} de {teuse.mention} !")
                 
             await asyncio.sleep(3600)
     

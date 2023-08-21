@@ -95,12 +95,12 @@ class Begin(commands.Cog):
         else:
             content = str(message.content)
             
-        if msg_str.lower() == "womp womp":
+        if "womp womp" in msg_str.lower():
             womp = Embed(title="WOMP WOMP !!!", color=0x800080)
             womp.set_image(url="https://media.tenor.com/13xUat9h3T4AAAAd/shylily-womp.gif")
             await message.channel.send(embed=womp)
             
-        if msg_str.lower() == "waku waku":
+        if "waku waku" in msg_str.lower():
             waku = Embed(title="WAKU WAKU !!!", color=0xee8281)
             waku.set_image(url="https://www.serieously.com/app/uploads/2022/06/anya.gif")
             await message.channel.send(embed=waku)

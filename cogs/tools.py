@@ -1,9 +1,14 @@
 # -- coding: utf-8 --
+
 # Biblio de Discord
 import discord
 from discord.ext import commands
 from discord.embeds import Embed
 from discord import app_commands
+
+# Autres
+import subprocess
+
 # Module du bot
 import tools.variables as var
 
@@ -17,22 +22,37 @@ class Tools(commands.GroupCog, name="tools"):
     # Commandes Outils/Tools
     # Retourne la latence
     @app_commands.command(name="ping", description="Affiche la latence.")
-    async def ping(self, interaction: discord.Interaction):
-        await interaction.response.send_message(f"Pong ! - La latence est de: **{self.bot.latency * 1000}** millisecondes.", ephemeral=True)
+    async def ping(self, react: discord.Interaction):
+        await react.response.send_message(f"Pong ! - La latence est de: **{self.bot.latency * 1000}** millisecondes.", ephemeral=True)
     
     # Retourne la version
     @app_commands.command(name="version", description="Obtiens le numéro de version")
-    async def version(self, interaction: discord.Interaction) -> None:
-        await interaction.response.send_message(f"Je suis en version: **{var.ver_num}** !", ephemeral=True)
+    async def version(self, react: discord.Interaction) -> None:
+        await react.response.send_message(f"Je suis en version: **{var.ver_num}** !", ephemeral=True)
     
     # Renvoie un lien vers le repo GitHub
     @app_commands.command(name="github", description="Lien vers le repo sur GitHub.")
-    async def git(self, interaction: discord.Interaction):
+    async def git(self, react: discord.Interaction):
         message = Embed(title="Lien du GitHub:", color=0xfbfcfc).add_field(name="Repo de Kiri-Chan:", value="https://github.com/Tintin361/Kiri-chan")\
         .add_field(name="Repo de Little Kyubey", value="https://github.com/Tintin361/Lil_Kyubey")\
         .add_field(name="Repo de NekoBot", value="https://github.com/Tintin361/NekoBot")\
         .add_field(name="Repo de VeemoBot", value="https://github.com/Tintin361/VeemoBot")
-        await interaction.response.send_message(embed=message, ephemeral=True)
+        await react.response.send_message(embed=message, ephemeral=True)
+        
+    # Envoie des commandes en Bash
+    @app_commands.command(name="syscom", description="Envoie un commande vers l'OS")
+    async def syscom(self, react: discord.Interaction, command: str):
+        await self.bot.wait_until_ready()
+        
+        if react.user.id != 443113150599004161:
+            return
+        
+        try:
+            result = subprocess.run(command, capture_output=True, text=True, shell=True)
+            output = result.stdout.strip() if result.stdout else "Pas de résultat"
+            await react.response.send_message(f"Sortie:\n{output[:1950]}")
+        except subprocess.CalledProcessError:
+            await react.response.send_message(f"Erreur lors de l'exécution de la commande `{command}`")
 
 # Fonction pour ajouter le cog
 async def setup(bot: commands.Bot) -> None:
