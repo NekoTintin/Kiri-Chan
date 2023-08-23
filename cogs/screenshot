@@ -22,18 +22,16 @@ class Screenshot(commands.Cog):
         
         await interaction.response.defer(thinking=False, ephemeral=False)
         
-        msg_hist = await chat_exporter.export(
-            interaction.channel,
-            limit=nombre,
-            bot=self.bot)
+        msg_hist = await chat_exporter.export(interaction.channel, limit=nombre, bot=self.bot)
 
         with open('hist.html', 'wb') as hist_file:
             hist_file.write(msg_hist.encode())
 
-        hti = Html2Image(output_path='/home/Tintin/discord_bot/Kiri-chan/')
-        hti.screenshot(html_file='hist.html', save_as='screen.png', size=(750, 5000))
+        hti = Html2Image(output_path='/home/Tintin/discord_bot/Kiri-chan/images')
         
-        await interaction.followup.send()
+        hti.screenshot(html_file='hist.html', save_as='screenshot.png', size=(1500, 5000))
+        
+        await interaction.followup.send("Créé")
         
         
 async def setup(bot):

@@ -28,11 +28,11 @@ async def main(bot):
         for filename in os.listdir("/home/Tintin/discord_bot/Kiri-chan/cogs/"):
             if filename.endswith(".py"):
                 await bot.load_extension(f"cogs.{filename[:-3]}")
-                var.add_module(filename[:-3])
-        for filename in os.listdir("/home/Tintin/discord_bot/Kiri-chan/rpg_cogs/"):
-            if filename.endswith(".py"):
-                await bot.load_extension(f"rpg_cogs.{filename[:-3]}")
-                var.add_module(filename[:-3])
+                var.enable_module(filename[:-3])
+        #for filename in os.listdir("/home/Tintin/discord_bot/Kiri-chan/rpg_cogs/"):
+            #if filename.endswith(".py"):
+                #await bot.load_extension(f"rpg_cogs.{filename[:-3]}")
+                #var.enable_module(filename[:-3])
         await bot.start(pwrd.bot_token)
   
 # Erreur de commande
@@ -61,86 +61,8 @@ async def _user_stat(react: discord.Interaction, user: discord.Member):
         
     await react.response.send_message(content=f"**{data[0]}**, personnage de {user.mention} possède un Niveau de Puissance de: {data[1]}.", ephemeral=True)
 
-class Credit_Modal(discord.ui.Modal):
-    
-    def __init__(self, title: str = "Crédit Sociaux") -> None:
-        self.user_target = user_target
-        self.nb_credit = discord.ui.TextInput(label="Entre un nombre.", placeholder=426662912, min_length=1, required=True)
-        super().__init__(title=title)
-    
-    async def on_submit(self, react: discord.Interaction):
-        try:
-            nb_credit_int = int(self.nb_credit.value)
-        except TypeError:
-            return await react.response.send_message("Entre un nombre valide, Grand Dictateur.", ephemeral=True)
-        
-        db = sqlite3.connect('/home/Tintin/discord_bot/Kiri-chan/data/user_data.db')
-        cur = db.cursor()
-        cur.execute("SELECT EXISTS(SELECT credit_value FROM credits WHERE user_id=?)", (self.user_target,))
-        db.commit()
-        data = cur.fetchone()
-    
-        if data[0] == 0:
-            await react.response.send_message(f"Cet utilisateur possède maintenant {self.nb_credit.value} crédits.", ephemeral=True)
-            cur.execute("INSERT INTO credits VALUES (?, ?)", (self.user_target, nb_credit_int))
-            db.commit()
-            db.close()
-            return
-    
-        await react.response.send_message(f"Cet utilisateur possède maintenant {self.nb_credits} crédits.", ephemeral=True)
-        cur.execute("UPDATE credits SET credit_value=? WHERE user_id=?", (nb_credit_int, self.user_target))
-        db.commit()
-        db.close()
-    
-
-async def _change_social_credit(react: discord.Interaction, user: discord.Member):
-    list_mod = [592750256899489825, 443113150599004161]
-    if react.user.id not in list_mod:
-        return await react.response.send_message("Seul le Dictateur Sympathique peut modifier le nombre de crédits sociaux.", ephemeral=True)
-    
-    if user.bot:
-        return await react.response.send_message("Les bots ne possèdent pas de crédits.", ephemeral=True)
-    elif user.id == 592750256899489825:
-        return await react.response.send_message("Le dictateur Kor1 ne peut pas avoir de crédits sociaux.", ephemeral=True)
-    elif user.id == 443113150599004161:
-        return await react.response.send_message("J'ai oubliée ta requête, désolée... 😅", ephemeral=True)
-    
-    await react.response.send_modal(Credit_Modal(user.id))
-    
-    
-async def _view_social_credits(react: discord.Interaction, user: discord.Member):
-    if user.bot:
-        return await react.response.send_message("Les bots ne possèdent pas de crédits.", ephemeral=True)
-    elif user.id == 592750256899489825:
-        return await react.response.send_message("Le dictateur Kor1 ne peut pas avoir de crédits sociaux.", ephemeral=True)
-    elif user.id == 443113150599004161:
-        return await react.response.send_message("J'ai oubliée ta requête, désolée... 😅", ephemeral=True)
-    
-    database = sqlite3.connect('/home/Tintin/discord_bot/Kiri-chan/data/user_data.db')
-    cur = database.cursor()
-    cur.execute("SELECT EXISTS(SELECT credit_value FROM credits WHERE user_id=?)", (user.id,))
-    database.commit()
-    data = cur.fetchone()
-    
-    if data[0] == 0:
-        await react.response.send_message(f"{user.mention} possède 0 crédits.", ephemeral=True)
-        cur.execute("INSERT INTO credits VALUES (?, ?)", (user.id, 0))
-        database.commit()
-        database.close()
-        return
-    
-    database.close()
-    return await react.response.send_message(f"{user.mention} possède {data[1]} crédit(s).", ephemeral=True)
-
-
 user_stat_menu = app_commands.ContextMenu(name="Niveau de Puissance", callback=_user_stat)
-view_social_credit = app_commands.ContextMenu(name="Voir les Crédits Sociaux", callback=_view_social_credits)
-credit_menu = app_commands.ContextMenu(name="Changer les Crédits Sociaux", callback=_change_social_credit)
-
-
 bot.tree.add_command(user_stat_menu)
-bot.tree.add_command(view_social_credit)
-bot.tree.add_command(credit_menu)
 """
 
 async def _multipost(react: discord.Interaction, msg: discord.Message):
@@ -178,6 +100,13 @@ async def _multipost(react: discord.Interaction, msg: discord.Message):
 
 message_menu = app_commands.ContextMenu(name="Publier sur d'autres serveurs", callback=_multipost)
 bot.tree.add_command(message_menu)
+
+for filename in os.listdir("/home/Tintin/discord_bot/Kiri-chan/cogs/"):
+    if filename != "__pycache__":
+        if filename.endswith(".py"):
+            var.disable_module(filename[:-3])
+        else:
+            var.disable_module(filename)
 
 # Démarre le bot
 asyncio.run(main(bot))

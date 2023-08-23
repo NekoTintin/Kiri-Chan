@@ -8,7 +8,8 @@ from discord.ui import View, Button
 # Autres
 from validators import url as test_url
 import yt_dlp as music
-from tools.variables import sites_dict, online_message, ban_domain, gapi
+from tools.variables import sites_dict, online_message, ban_domain
+from tools.passwords import gapi
 import tools.formats as formats
 import pyshorteners
 from typing import Literal
@@ -88,7 +89,7 @@ def create_embed(data: dict, title: str, channel: str, list_id: int, list_max: i
     else:
         embed_title = f"**{title}**"
     
-    extractor = sites_dict.get("extractor", sites_dict["générique"])
+    extractor = sites_dict.get(data["extractor"], sites_dict["générique"])
     
     emb = Embed(title=embed_title, description=f"***{bot_name}*** en cours de lecture dans 🔊 **{channel}**.",
                 color=extractor["color"])

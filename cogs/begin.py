@@ -30,31 +30,37 @@ class Begin(commands.Cog):
         print(f"Version du bot: {var.ver_num}")
         await self.bot.change_presence(status=discord.Status.online, activity=discord.Activity(type=discord.ActivityType.watching, name=var.online_message))
         
+        with open("/home/Tintin/discord_bot/Kiri-chan/data/list_of_channels.txt", "w") as file:
+            pass
         with open("/home/Tintin/discord_bot/Kiri-chan/data/list_of_channels.txt", "a") as file:
             for guild in self.bot.guilds:
-                channels = guild.channels
-                file.write(f"{guild.name} - {channels}")
-            
-        with open("/home/Tintin/discord_bot/Kiri-chan/data/list_of_user.txt", "a") as file:
-            list = []
-            for guild in self.bot.guilds:
-                for member in guild.members:
-                    if member.id not in list:
-                        list.append(
-                             {"member_id": member.id,
-                             "member_name": member.name,
-                             "avatar": member.avatar,
-                             "roles": member.roles,
-                             "joined_at": member.joined_at,})
-            file.write(str(list))
+                file.write(f"---- {guild.name}:\n")
+                for channel in guild.channels:
+                    file.write(f"- {channel}\n")
         
+        with open("/home/Tintin/discord_bot/Kiri-chan/data/list_of_user.txt", "w") as file:
+            pass
+        with open("/home/Tintin/discord_bot/Kiri-chan/data/list_of_user.txt", "a") as file:
+            file.write("Liste des membres :\n\n")
+            
+            for guild in self.bot.guilds:
+                file.write(f"Serveur : {guild.name}\n")
+                
+                for member in guild.members:
+                    file.write(f"-- Nom: {member.name}\n")
+                    file.write(f"    ID: {member.id}\n")
+                    file.write(f"    Avatar: {member.avatar}\n")
+                    file.write(f"    Rôles: {', '.join([role.name for role in member.roles])}\n")
+                    file.write(f"    Membre depuis: {str(member.joined_at)}\n")
+                file.write("\n")
         
     # Permet de charger un cog
     @commands.command(name="load")
     async def load(self, ctx, extention):
         await ctx.message.delete()
         await self.bot.load_extension(f"cogs.{extention}")
-        var.add_module(extention)
+        fmt = await ctx.bot.tree.sync()
+        var.enable_module(extention)
         await ctx.send(f"Le module {extention} a bien été chargé")
         
     # Permet de décharger un cog
@@ -62,7 +68,8 @@ class Begin(commands.Cog):
     async def unload(self, ctx, extention):
         await ctx.message.delete()
         await self.bot.unload_extension(f"cogs.{extention}")
-        var.remove_module(extention)
+        fmt = await ctx.bot.tree.sync()
+        var.disable_module(extention)
         await ctx.send(f"Le module {extention} a bien été déchargé")
         
     # Permet de recharger un cog
@@ -71,14 +78,16 @@ class Begin(commands.Cog):
         await ctx.message.delete()
         await self.bot.unload_extension(f"cogs.{extention}")
         await self.bot.load_extension(f"cogs.{extention}")
+        fmt = await ctx.bot.tree.sync()
         await ctx.send(f"Le module {extention} a bien été rechargé")
         
-    # Envoie un message avec la liste des modules chargés
+    # Envoie un message avec la liste des modules
     @commands.command(name="modules", aliases=['mod'])
     async def modules(self, ctx):
-        message = f"Liste des modules chargés:\n"
-        for mod in var.get_modules():
-            message += f"- **{mod}**\n"
+        message = f"Liste des modules:\n"
+        mods = var.get_modules()
+        for mod in mods:
+            message += f"- **{mod}**: {mods[mod]}\n"
         await ctx.send(message)
         
     # Se déclenche à chaque message
@@ -120,8 +129,6 @@ class Begin(commands.Cog):
             await ctx.send(f"{len(fmt)} commandes ont été synchronisées.")
         else:
             ctx.bot.tree.copy()
-            
-        
         
 async def setup(bot):
     await bot.add_cog(Begin(bot))

@@ -1,7 +1,6 @@
 __pycache__
 history.txt
 tools/passwords.py
-tools/variables.py
 images/
 cogs/cece.py
 .gitignore
