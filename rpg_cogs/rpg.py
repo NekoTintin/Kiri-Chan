@@ -71,15 +71,15 @@ class Rpg(commands.GroupCog, name="rpg"):
         data = cur.fetchone()
         
         msg = Embed(title=f"Statistiques de: {data[0]}", color=0x00ffe1)
-        msg.add_field(name="HP Maximum:", value=f"**{data[1]}**")
-        msg.add_field(name="MP Maximum:", value=f"**{data[2]}**")
+        msg.add_field(name="HP Max:", value=f"**{data[1]}**")
+        msg.add_field(name="MP Max:", value=f"**{data[2]}**")
         msg.add_field(name="Attaque:", value=f"**{data[3]}**")
         msg.add_field(name="Défense:", value=f"**{data[4]}**")
         msg.add_field(name="Or:", value=f"**{data[5]}**")
         msg.add_field(name="Niveau de Puissance:", value=f"**{data[6]}**")
         msg.set_author(name=interaction.user.display_name, icon_url=interaction.user.display_avatar)
-        msg.set_footer(text="Kiri-chan: The Promised Neverlands of Jojo !", icon_url="https://images-ext-1.discordapp.net/external/7Yhla3kMaxtVKEFZIv9vOuDWsLeA8-pSvB2AFyYeNr4/%3Fsize%3D4096%26ignore%3Dtrue/https/cdn.discordapp.com/avatars/789984188224110632/b06507f8de4e4883b8fac4b2330cbb5b.png?width=634&height=634")
-        msg.set_thumbnail(url="https://media.istockphoto.com/id/1223671392/fr/vectoriel/photo-de-profil-par-défaut-avatar-photo-placeholder-illustration-de-vecteur.jpg?s=170667a&w=0&k=20&c=EqD6q8IUqwN_bgGec0UBhh3tk2Zuur5lezDDlQsGdPY=")
+        msg.set_footer(text="Kiri-chan", icon_url=self.bot.user.display_avatar)
+        msg.set_thumbnail(url="https://shorturl.at/gjpM5")
 
 
         await interaction.followup.send(embed=msg, ephemeral=True)

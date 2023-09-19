@@ -11,7 +11,7 @@ class Bdsm(commands.Cog):
     def __init__(self, bot) -> None:
         self.bot = bot
         bot.loop.create_task(self._bdsm())
-        bot.loop.create_task(self._annoying_ping())
+        #bot.loop.create_task(self._annoying_ping())
         
     async def _bdsm(self):
         await self.bot.wait_until_ready()

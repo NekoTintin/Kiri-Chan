@@ -59,7 +59,7 @@ class Begin(commands.Cog):
     async def load(self, ctx, extention):
         await ctx.message.delete()
         await self.bot.load_extension(f"cogs.{extention}")
-        fmt = await ctx.bot.tree.sync()
+        await ctx.bot.tree.sync()
         var.enable_module(extention)
         await ctx.send(f"Le module {extention} a bien été chargé")
         
@@ -68,7 +68,7 @@ class Begin(commands.Cog):
     async def unload(self, ctx, extention):
         await ctx.message.delete()
         await self.bot.unload_extension(f"cogs.{extention}")
-        fmt = await ctx.bot.tree.sync()
+        await ctx.bot.tree.sync()
         var.disable_module(extention)
         await ctx.send(f"Le module {extention} a bien été déchargé")
         
@@ -78,7 +78,7 @@ class Begin(commands.Cog):
         await ctx.message.delete()
         await self.bot.unload_extension(f"cogs.{extention}")
         await self.bot.load_extension(f"cogs.{extention}")
-        fmt = await ctx.bot.tree.sync()
+        await ctx.bot.tree.sync()
         await ctx.send(f"Le module {extention} a bien été rechargé")
         
     # Envoie un message avec la liste des modules

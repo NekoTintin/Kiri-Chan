@@ -27,6 +27,7 @@ class Fight(commands.Cog):
         await interaction.followup.send("SEXSEAL a perdu parce qu'il est inintéressant.")
     """
     
+    """
     @app_commands.guild_only()
     @app_commands.guilds(759147102093049876)
     @app_commands.command(name="fight", description="C'est l'heure de la bagarre !")
@@ -65,7 +66,14 @@ class Fight(commands.Cog):
             
             
             await interaction.followup.send(embed=msg, file=file, view=view)
-            
+    """
+    
+    @app_commands.command(name="fight", description="C'est l'heure de la bagarre !")
+    async def _fight(self, react: discord.Interaction, adversaire: discord.User):
+        await self.bot.wait_until_ready()
+        await react.response.defer()
+        
+        
         
 async def setup(bot):
     await bot.add_cog(Fight(bot))

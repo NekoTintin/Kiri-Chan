@@ -29,10 +29,10 @@ async def main(bot):
             if filename.endswith(".py"):
                 await bot.load_extension(f"cogs.{filename[:-3]}")
                 var.enable_module(filename[:-3])
-        #for filename in os.listdir("/home/Tintin/discord_bot/Kiri-chan/rpg_cogs/"):
-            #if filename.endswith(".py"):
-                #await bot.load_extension(f"rpg_cogs.{filename[:-3]}")
-                #var.enable_module(filename[:-3])
+        """for filename in os.listdir("/home/Tintin/discord_bot/Kiri-chan/rpg_cogs/"):
+            if filename.endswith(".py"):
+                await bot.load_extension(f"rpg_cogs.{filename[:-3]}")
+                var.enable_module(filename[:-3])"""
         await bot.start(pwrd.bot_token)
   
 # Erreur de commande
@@ -59,7 +59,7 @@ async def _user_stat(react: discord.Interaction, user: discord.Member):
     cur.execute("SELECT player_name, player_power FROM players WHERE player_discord_id=? AND player_is_dead=0", (user.id,))
     data = cur.fetchone()
         
-    await react.response.send_message(content=f"**{data[0]}**, personnage de {user.mention} possède un Niveau de Puissance de: {data[1]}.", ephemeral=True)
+    await react.response.send_message(content=f"**{data[0]}**, personnage de {user.mention} possède {data[1]} de Puissance.", ephemeral=True)
 
 user_stat_menu = app_commands.ContextMenu(name="Niveau de Puissance", callback=_user_stat)
 bot.tree.add_command(user_stat_menu)
