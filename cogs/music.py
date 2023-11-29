@@ -10,15 +10,14 @@ from validators import url as test_url
 import yt_dlp as music
 from tools.variables import sites_dict, online_message, ban_domain
 from tools.passwords import gapi
-#import tools.formats as formats
 import pyshorteners
-from typing import Literal
+#from typing import Literal
 from googleapiclient.discovery import build
 from random import randint as rd
-#import asyncio
+import asyncio
 
 # Pour le téléchargement
-format_list = Literal["mp3", "ogg", "wav", "m4a"]
+#format_list = Literal["mp3", "ogg", "wav", "m4a"]
 
 # Pour la lecture en streaming
 ffmpeg_opts = {'options': '-vn'}
@@ -81,12 +80,12 @@ def time_convert(time) -> str():
             return f"00:{time}"
         elif len(time) == 1:
             return f"00:0{time}"
+        else:
+            return time
     except:
-        if time == None:
-            return "Diffusion en direct"
-    return time
+        return None
 
-def create_embed(data: dict, title: str, next_title: str, voice_channel_id: int, list_id: int, list_max: int, video_link: str, next_link: str, is_live: bool) -> Embed:
+def create_embed(data: dict, title: str, next_title: str, voice_channel_id: int, list_id: int, list_max: int, video_link: str, next_link: str) -> Embed:
     list_id += 1
     extractor = sites_dict.get(data["extractor"], sites_dict["générique"])
     
@@ -98,16 +97,16 @@ def create_embed(data: dict, title: str, next_title: str, voice_channel_id: int,
     emb.set_image(url=data["thumbnail"])
     
     if list_id == list_max:
-        value_str = "*Fin de la Liste d'attente*"
+        value_str = "**Fin de la Liste d'attente**"
     else:
-        value_str = f"*{next_title}\n{next_link}*"
+        value_str = f"**{next_title}\n{next_link}**"
         
     if list_max > 1:
         emb.add_field(name=f"📋 Dans la Liste d'attente [{list_id}/{list_max}]",
             value=value_str,
             inline=False)
     
-    if is_live == True:
+    if data["is_live"] == True:
         emb.set_footer(icon_url=extractor["icon_url"],
             text=f"Streaming via {data['extractor'].capitalize()}")
     else:
@@ -170,7 +169,7 @@ class Player():
             else:
                 next_title = None
                 next_url = None
-            self.message_embed = create_embed(self.video_data, self.list[self.list_id]['video_title'], next_title, self.voice_channel.id, self.list_id, self.list_max, self.list[self.list_id]["video_url"], next_url, self.video_data["is_live"])
+            self.message_embed = create_embed(self.video_data, self.list[self.list_id]['video_title'], next_title, self.voice_channel.id, self.list_id, self.list_max, self.list[self.list_id]["video_url"], next_url)
             self.message_view = await self.create_view(self.video_data['is_live'])
             await self.set_status(self.list[self.list_id]['video_title'])
 
@@ -197,7 +196,7 @@ class Player():
         forw_button = Button(label="Suivante", style=discord.ButtonStyle.primary, emoji="<:forward_icon:1148310147265990750>", row=1)
 
         if self.enable_random == False:
-            shuffle_button = Button(label="Suffle", style=discord.ButtonStyle.green, emoji="<:shuffle_icon:1153724588103061595>", row=1)
+            shuffle_button = Button(label="Shuffle", style=discord.ButtonStyle.green, emoji="<:shuffle_icon:1153724588103061595>", row=1)
         else:
             shuffle_button = Button(label="Activé", style=discord.ButtonStyle.green, emoji="<:shuffle_icon:1153724588103061595>", row=1)
         
@@ -261,9 +260,9 @@ class Player():
 
         async def backward(react: discord.Interaction):
             await react.response.defer(thinking=False)
+            self.list_id -= 1
             if self.voice.is_playing():
                 self.voice.stop()
-            self.list_id -= 1
             await self.audio_play(playing_mode=True)
             
             await react.message.edit(suppress=True)
@@ -271,15 +270,12 @@ class Player():
 
         async def forward(react: discord.Interaction):
             await react.response.defer(thinking=False)
-            if self.voice.is_playing():
-                self.voice.stop()
-            await react.followup.send(str(self.enable_random))
             if self.enable_random == True:
-                n = rd(0, self.list_max-1)
-                print(n)
-                self.list_id = n
+                self.list_id = rd(0, self.list_max-1)
             else:
                 self.list_id += 1
+            if self.voice.is_playing():
+                self.voice.stop()
             await self.audio_play(playing_mode=True)
             
             await react.message.edit(suppress=True)
@@ -292,7 +288,7 @@ class Player():
                 shuffle_button.emoji = "<:shuffle_icon:1153724588103061595>"
                 self.enable_random = True
             else:
-                shuffle_button.label = "Suffle"
+                shuffle_button.label = "Shuffle"
                 shuffle_button.emoji = "<:shuffle_icon:1153724588103061595>"
                 self.enable_random = False
             await react.message.edit(view=self.message_view)
@@ -345,7 +341,9 @@ class Player():
         await self.audio_play(playing_mode=True)
         return {"embed": self.message_embed, "view": self.message_view}
     
-    def set_msg_id(self, id: int):
+    def msg_id(self, id: int) -> int:
+        if id == 0:
+            return self.message_id
         self.message_id = id
 
 @app_commands.guild_only()
@@ -355,8 +353,9 @@ class Music(commands.Cog, name="music"):
         self.bot = bot
         self.dict_of_player = dict()
         self.dict_of_message = dict()
-        self.idle_time = None
         self.voice = None
+        self.guild = None
+        self.channel = None
         super().__init__()
         
     @app_commands.command(name="play", description="Joue le son d'une vidéo ou d'un live depuis un lien ou une recherche.")
@@ -364,46 +363,48 @@ class Music(commands.Cog, name="music"):
         await self.bot.wait_until_ready()
         await react.response.defer(ephemeral=False)
         
-        guild = react.guild
+        self.guild = react.guild
         # Vérifie si l'utilisateur est connecté sans un salon vocal 
         try:
             voice_state = react.user.voice
             if voice_state is not None and voice_state.channel is not None:
-                channel = voice_state.channel
+                self.channel = voice_state.channel
             elif salon != None:
-                channel = self.bot.get_channel(int(salon))
+                self.channel = self.bot.get_channel(int(salon))
             else:
                 return await react.followup.send("Connecte-toi à un salon vocal pour jouer de la musique.", ephemeral=True)
         except:
             return await react.followup.send("Connecte-toi à un salon vocal pour jouer de la musique.", ephemeral=True)
         
-        self.voice: discord.VoiceClient = discord.utils.get(self.bot.voice_clients, guild=guild)    
+        self.voice: discord.VoiceClient = discord.utils.get(self.bot.voice_clients, guild=self.guild)    
 
         if self.voice == None:
-            await channel.connect()
-            self.voice: discord.VoiceClient = discord.utils.get(self.bot.voice_clients, guild=guild)
+            await self.channel.connect()
+            self.voice: discord.VoiceClient = discord.utils.get(self.bot.voice_clients, guild=self.guild)
         elif self.voice != None:
-            if self.dict_of_player.get(guild.id, None) != None:
+            if self.dict_of_player.get(self.guild.id, None) != None:
                 return await react.followup.send("Kiri-chan est déjà connectée. Pour lire une autre musique, ajoute la avec le bouton Ajouter.")
         elif self.voice.is_playing() or self.voice.is_paused():
             return await react.followup.send("Kiri-chan est déjà connectée dans un autre salon. Pour lire une autre musique, ajoute la avec le bouton Ajouter.")
             
-        if self.dict_of_player.get(guild.id, None) != None:
-            self.dict_of_player[guild.id] = None
-            current_player = Player(self.bot, self.voice, react.channel, channel)
-            self.dict_of_player[guild.id] = current_player
+        if self.dict_of_player.get(self.guild.id, None) != None:
+            self.dict_of_player[self.guild.id] = None
+            current_player = Player(self.bot, self.voice, react.channel, self.channel)
+            self.dict_of_player[self.guild.id] = current_player
         else:
-            current_player = Player(self.bot, self.voice, react.channel, channel)
-            self.dict_of_player[guild.id] = current_player
+            current_player = Player(self.bot, self.voice, react.channel, self.channel)
+            self.dict_of_player[self.guild.id] = current_player
             
         message = await current_player.play_sound(flux)
         if message.get("content", None) != None:
-            return await react.followup.send(content=message.get("content"), ephemeral=False)
+            await react.followup.send(content=message.get("content"), ephemeral=False)
         else:
             sended_msg = await react.followup.send(embed=message.get("embed"), view=message.get("view"), ephemeral=False, wait=True)
             msg2 = await sended_msg.fetch()
-            current_player.set_msg_id(msg2.id)
-            self.dict_of_message = {guild.id: message}
+            current_player.msg_id(msg2.id)
+            self.dict_of_message = {self.guild.id: message}
+
+        self.bot.loop.create_task(self._check_members_in_channel())
     
     @app_commands.command(name="disconnect", description="Déconnecte le bot.")
     async def _disconnect(self, react: discord.Interaction):
@@ -414,17 +415,22 @@ class Music(commands.Cog, name="music"):
         await voice.disconnect()
         await react.response.send_message("Kiri-chan s'est déconnectée.", ephemeral=True, delete_after=15)
         await self.bot.change_presence(status=discord.Status.online, activity=discord.Activity(type=discord.ActivityType.watching, name=online_message))
-
-    """
-    async def _disconnect_time_out(self):
-        await self.bot.wait_until_ready()
-        self.idle_time += 60
-        print(self.idle_time)
-        while self.voice.is_connected():
-            if not self.voice.is_playing() or not self.voice.is_paused():
-                if self.idle_time >= 900:
-                    return self.voice.disconnect()
-        await asyncio.sleep(60)"""
             
+    async def _check_members_in_channel(self):
+        await self.bot.wait_until_ready()
+        is_active = True
+
+        while is_active:
+            if len(self.channel.members) <= 1:
+                is_active = False
+                msg_id = self.dict_of_player[self.guild.id].msg_id(id=0)
+                msg = await self.channel.fetch_message(msg_id)
+                await msg.delete()
+                
+                await self.channel.guild.voice_client.disconnect()
+                await self.bot.change_presence(status=discord.Status.online, activity=discord.Activity(type=discord.ActivityType.watching, name=online_message))
+                
+            await asyncio.sleep(600)
+
 async def setup(bot):
     await bot.add_cog(Music(bot))
