@@ -5,6 +5,7 @@ from datetime import datetime as dt
 import pytz
 import tools.variables as var
 import platform
+import tools.paths as paths
 
 def write_in_txt(content, file):
     with open(file, "w") as f:
@@ -30,17 +31,17 @@ class Begin(commands.Cog):
         print(f"Version du bot: {var.ver_num}")
         await self.bot.change_presence(status=discord.Status.online, activity=discord.Activity(type=discord.ActivityType.watching, name=var.online_message))
         
-        with open("/home/Tintin/discord_bot/Kiri-chan/data/list_of_channels.txt", "w") as file:
+        with open(f"{paths.data_path}list_of_channels.txt", "w") as file:
             pass
-        with open("/home/Tintin/discord_bot/Kiri-chan/data/list_of_channels.txt", "a") as file:
+        with open(f"{paths.data_path}list_of_channels.txt", "a") as file:
             for guild in self.bot.guilds:
                 file.write(f"---- {guild.name}:\n")
                 for channel in guild.channels:
                     file.write(f"- {channel}\n")
         
-        with open("/home/Tintin/discord_bot/Kiri-chan/data/list_of_user.txt", "w") as file:
+        with open(f"{paths.data_path}list_of_user.txt", "w") as file:
             pass
-        with open("/home/Tintin/discord_bot/Kiri-chan/data/list_of_user.txt", "a") as file:
+        with open(f"{paths.data_path}list_of_user.txt", "a") as file:
             file.write("Liste des membres :\n\n")
             
             for guild in self.bot.guilds:
@@ -115,7 +116,7 @@ class Begin(commands.Cog):
             await message.channel.send(embed=waku)
     
         username = await self.bot.fetch_user(message.author.id)
-        with open ("/home/Tintin/discord_bot/Kiri-chan/data/history.txt", "a") as hist:
+        with open (f"{paths.data_path}history.txt", "a") as hist:
             hist.write(f"{get_time()} - {username}: {content}\n")
         
         if message.channel.id == 935514239035142164:

@@ -12,6 +12,7 @@ from validators import url as test_url
 # Modules avec tous les mots de passe [que vous ne pouvez pas voir :)].
 import tools.passwords as pwrd
 import tools.variables as var
+import tools.paths as paths
 
 # Variable pour le bot
 ver_num = var.ver_num
@@ -25,7 +26,7 @@ bot = commands.Bot(command_prefix="-", owner_ids=set(pwrd.owner), help_command=N
 @bot.command()
 async def main(bot):
     async with bot:
-        for filename in os.listdir("/home/Tintin/discord_bot/Kiri-chan/cogs/"):
+        for filename in os.listdir(paths.cogs_path):
             if filename.endswith(".py"):
                 await bot.load_extension(f"cogs.{filename[:-3]}")
                 var.enable_module(filename[:-3])
@@ -101,7 +102,7 @@ async def _multipost(react: discord.Interaction, msg: discord.Message):
 message_menu = app_commands.ContextMenu(name="Publier sur d'autres serveurs", callback=_multipost)
 bot.tree.add_command(message_menu)
 
-for filename in os.listdir("/home/Tintin/discord_bot/Kiri-chan/cogs/"):
+for filename in os.listdir(paths.cogs_path):
     if filename != "__pycache__":
         if filename.endswith(".py"):
             var.disable_module(filename[:-3])

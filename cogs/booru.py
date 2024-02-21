@@ -7,6 +7,7 @@ from pybooru import Danbooru
 from secrets import token_hex, SystemRandom
 from tools.passwords import danbooru_api
 from tools.variables import values
+import tools.paths as paths
 
 dan = Danbooru('danbooru', username="Kiri-chan27", api_key=danbooru_api)
 safe = Danbooru('safebooru', username="Kiri-chan27", api_key=danbooru_api)
@@ -22,7 +23,7 @@ class Posts_Button(discord.ui.View):
         link = interaction.message.embeds[0].image.url
         
         try:
-            with open(f"/home/Tintin/discord_bot/NekoBot/data/{id}.txt", "a") as file:
+            with open(f"{paths.nekobot_path}data/{id}.txt", "a") as file:
                 file.write(f"{link}\n")
             await interaction.response.send_message("✅ Ajouté à ta liste !", delete_after=15, ephemeral=True)
             return

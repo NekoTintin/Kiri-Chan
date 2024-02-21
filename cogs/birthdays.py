@@ -6,6 +6,7 @@ import sqlite3
 import re
 from datetime import datetime as dt
 from pytz import timezone
+import tools.paths as paths
 
 IST = timezone('Europe/Paris')
 
@@ -67,7 +68,7 @@ class Birthday(commands.GroupCog, name="birthday"):
                     await channel.send(f"Hey @everyone !\n{user.mention} fête son anniversaire aujourd'hui !\n{user.display_name} a maintenant {now.year - int(year)} ans.\nhttps://tenor.com/fr/view/im-old-mister-j-day-je-suis-vieux-j-day-vieux-gif-17846810")
 
     def get_b_list(self):
-        database = sqlite3.connect("/home/Tintin/discord_bot/Kiri-chan/data/user_data.db")
+        database = sqlite3.connect(paths.db_path)
         cur = database.cursor()
         cur.execute("""SELECT discord_id, user_date FROM birthdays""")
         database.commit()
@@ -75,8 +76,8 @@ class Birthday(commands.GroupCog, name="birthday"):
         database.close()
         return response
         
-def execute_database(query: str, is_insert: bool, data: list() = None) -> list() or None:
-    database = sqlite3.connect("/home/Tintin/discord_bot/Kiri-chan/data/user_data.db")
+def execute_database(query: str, is_insert: bool, data: list = None) -> list:
+    database = sqlite3.connect(paths.db_path)
     cur = database.cursor()
     if is_insert:
         cur.execute(query, (data[0], data[1]))
