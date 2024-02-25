@@ -7,3 +7,4 @@ tools/paths.py
 .gitignore
 .vscode
 data
+tools/paths.py

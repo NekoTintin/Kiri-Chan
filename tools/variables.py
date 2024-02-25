@@ -1,7 +1,7 @@
 from typing import Literal
 
-ver_num = "3.3.3"
-online_message = "PEPPA PIG 3 HAS UPDATES"
+ver_num = "3.4.0"
+online_message = "Sploon 3"
 
 mods = {}
 

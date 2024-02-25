@@ -5,3 +5,5 @@ db_path = "/home/tintin/discord_bot/Kiri-chan/data/user_data.db"
 
 nekobot_path = "/home/tintin/discord_bot/NekoBot/"
 nekodata_path = "/home/tintin/discord_bot/NekoBot/data/"
+
+web_path = "/var/www/html/images/"

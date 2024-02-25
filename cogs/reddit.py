@@ -1,21 +1,22 @@
-# Bibliothèques de Discord
 import discord
 from discord.ext import commands
 from discord.embeds import Embed
 from discord import app_commands
 
-# Autres
 from datetime import datetime
 from praw import Reddit as Red
 from secrets import SystemRandom
+
 import tools.passwords as pwrd
+from tools.paths import nekodata_path
+from os import path, mkdir
 
 # Défini l'objet Reddit pour accéder au compte de Kirlia-Chan
 wrapper = Red(
     # ID pour s'identifier en tant que Bot sur Reddit
     client_id = pwrd.reddit_id,
     client_secret = pwrd.reddit_secret,
-    user_agent = "discord.py:kirlia-chan-bot:v3.2.3(by u/tintin361yt)",
+    user_agent = "discord.py:kirlia-chan-bot:v3.4.0(by u/tintin361yt)",
     # ID du compte Reddit
     username = "Kirlia-chan",
     password = pwrd.reddit_password,
@@ -54,13 +55,13 @@ class Posts_Button(discord.ui.View):
         link = react.message.embeds[0].image.url
         
         try:
-            with open(f"/home/Tintin/discord_bot/NekoBot/data/{id}.txt", "a") as file:
+            if not path.exists(f"{nekodata_path}{id}"):
+                mkdir(f"{nekodata_path}{id}")
+            with open(f"{nekodata_path}{id}/list.txt", "a") as file:
                 file.write(f"{link}\n")
-            await react.response.send_message("✅ Ajouté à ta liste !", delete_after=15, ephemeral=True)
-            return
+            return await react.response.send_message("✅ Ajouté à ta liste !", delete_after=15, ephemeral=True)
         except:
-            await react.response.send_message("❌ Impossible de l'ajouter à la liste...", delete_after=15, ephemeral=True)
-            return
+            return await react.response.send_message("❌ Impossible de l'ajouter à la liste...", delete_after=15, ephemeral=True)
         
     @discord.ui.button(label=f"Upvote", style=discord.ButtonStyle.primary, emoji="🔼", row=1)
     async def _upvote(self, react: discord.Interaction, button: discord.ui.Button):
@@ -156,7 +157,7 @@ class Reddit(commands.GroupCog, name="reddit"):
         await react.followup.send(content=f"Le score de ce post est de **{content}**.", ephemeral=True)
         
 
-def get_post(sub: str, sort_type: str, limit: int, is_nsfw: bool) -> dict or None:
+def get_post(sub: str, sort_type: str, limit: int, is_nsfw: bool) -> dict:
     # Vérifie si le subreddit existe sinon retourne un message d'erreur
     if wrapper.subreddits.search_by_name(query=sub, exact=True) == None:
         return None

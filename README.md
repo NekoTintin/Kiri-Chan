@@ -10,7 +10,6 @@ Contient des fonction pour Youtube, Reddit, Twitter, les différents booru et Pi
 - Moebooru
 - pixivpy3
 - PRAW
-- Tweepy (pas encore utilisé)
 - YT-DLP
 - Chat_exporter
 - Html2Image

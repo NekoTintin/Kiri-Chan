@@ -5,9 +5,10 @@ from discord import app_commands
 
 from pybooru import Danbooru
 from secrets import token_hex, SystemRandom
+from os import path, mkdir
 from tools.passwords import danbooru_api
 from tools.variables import values
-import tools.paths as paths
+from tools.paths import nekodata_path
 
 dan = Danbooru('danbooru', username="Kiri-chan27", api_key=danbooru_api)
 safe = Danbooru('safebooru', username="Kiri-chan27", api_key=danbooru_api)
@@ -18,18 +19,18 @@ class Posts_Button(discord.ui.View):
         super().__init__(timeout=timeout)
         
     @discord.ui.button(label="Ajouter à ta liste", style=discord.ButtonStyle.success, emoji="📝")
-    async def add_to_list(self, interaction: discord.Interaction, button: discord.ui.Button):
-        id = interaction.user.id
-        link = interaction.message.embeds[0].image.url
+    async def _add_to_list(self, react: discord.Interaction, button: discord.ui.Button):
+        id = react.user.id
+        link = react.message.embeds[0].image.url
         
         try:
-            with open(f"{paths.nekobot_path}data/{id}.txt", "a") as file:
+            if not path.exists(f"{nekodata_path}{id}"):
+                mkdir(f"{nekodata_path}{id}")
+            with open(f"{nekodata_path}{id}/list.txt", "a") as file:
                 file.write(f"{link}\n")
-            await interaction.response.send_message("✅ Ajouté à ta liste !", delete_after=15, ephemeral=True)
-            return
+            return await react.response.send_message("✅ Ajouté à ta liste !", delete_after=15, ephemeral=True)
         except:
-            await interaction.response.send_message("❌ Impossible de l'ajouter à la liste...", delete_after=15, ephemeral=True)
-            return
+            return await react.response.send_message("❌ Impossible de l'ajouter à la liste...", delete_after=15, ephemeral=True)
 
 class Pybooru(commands.GroupCog, name="pybooru"):
     

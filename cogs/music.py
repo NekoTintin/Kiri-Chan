@@ -31,7 +31,7 @@ opts_video = {'format': 'bestaudio/best', 'postprocessors': [{'key': 'FFmpegExtr
 
 youtube = build("youtube", "v3", developerKey=gapi)
 
-def get_video_list(search: str) -> list() or None:
+def get_video_list(search: str) -> list:
     video_list = list()
     try:
         with music.YoutubeDL(opts_playlist) as ytdl:
@@ -60,7 +60,7 @@ def get_video_list(search: str) -> list() or None:
     except:
         return None
 
-def get_video_data(link: str) -> dict():
+def get_video_data(link: str) -> dict:
     video_data = dict()
     with music.YoutubeDL(opts_video) as video:
         data = video.extract_info(link, download=False)
@@ -74,7 +74,7 @@ def get_video_data(link: str) -> dict():
             "is_live": data.get("is_live", None)}
     return video_data
 
-def time_convert(time) -> str():
+def time_convert(time) -> str:
     try:
         if len(time) == 2:
             return f"00:{time}"
@@ -132,16 +132,16 @@ class Player():
         self.voice_channel = voice_channel
         self.message_embed = None
         self.message_view = None
-        self.message_id = int()
+        self.message_id = int
         # Variables pour la list
-        self.list = list()
-        self.name_list = list()
-        self.list_id = int()
-        self.list_max = int()
+        self.list = list
+        self.name_list = list
+        self.list_id = int
+        self.list_max = int
         self.enable_random = False
         # Variables pour la vidéo en cours de lecture
-        self.video_data = dict()
-        self.video_url = str()
+        self.video_data = dict
+        self.video_url = str
         
     # Gestion de la lecture audio
     async def audio_play(self, playing_mode: bool = False) -> None:
@@ -205,7 +205,7 @@ class Player():
                 self.list.append(video)
             self.list_max = len(self.list)
 
-        async def change_embed() -> Embed and View:
+        async def change_embed() -> Embed: # and View
             if self.list_id + 1 < len(self.list):
                 next_title = self.list[self.list_id+1]['video_title']
                 next_url = self.list[self.list_id+1]['video_url']
@@ -331,7 +331,7 @@ class Player():
 
         return view
     
-    async def play_sound(self, flux: str) -> dict():
+    async def play_sound(self, flux: str) -> dict:
         self.list = get_video_list(flux)
         if self.list == None:
             return {"content": "Ce site n'est pas supporté."}
