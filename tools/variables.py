@@ -1,6 +1,6 @@
 from typing import Literal
 
-ver_num = "3.6.0a"
+ver_num = "3.6.0b"
 online_message = "Sploon 3"
 
 mods = {}
@@ -62,3 +62,5 @@ sites_dict = {
         "message": None
     }
 }
+
+nsfw_values = { True: ["explicit", "questionable"], False: ["general", "sensitive"] }

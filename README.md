@@ -2,16 +2,15 @@
 
 Bot Discord fait en python pour quelques serveurs privés.
 
+Permet de lire de la musique dans un salon vocal.
 Contient des fonction pour Youtube, Reddit, Twitter, les différents booru et Pixiv.
 
 ## Modules tiers utilisés
 - Discord.py
 - Pytz
-- Moebooru
-- pixivpy3
+- pixivpy3 (à faire)
 - PRAW
-- YT-DLP
+- YT_-_DLP
 - Chat_exporter
 - Html2Image
 - pyshorteners
-- Asyncio

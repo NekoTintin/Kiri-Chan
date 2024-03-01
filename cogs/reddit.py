@@ -10,13 +10,14 @@ from secrets import SystemRandom
 import tools.passwords as pwrd
 from tools.paths import nekodata_path
 from os import path, mkdir
+from tools.variables import ver_num
 
 # Défini l'objet Reddit pour accéder au compte de Kirlia-Chan
 wrapper = Red(
     # ID pour s'identifier en tant que Bot sur Reddit
     client_id = pwrd.reddit_id,
     client_secret = pwrd.reddit_secret,
-    user_agent = "discord.py:kirlia-chan-bot:v3.6.0a(by u/tintin361yt)",
+    user_agent = f"discord.py:kirlia-chan-bot:v{ver_num}(by u/tintin361yt)",
     # ID du compte Reddit
     username = "Kirlia-chan",
     password = pwrd.reddit_password,
