@@ -52,6 +52,13 @@ class Tools(commands.GroupCog, name="tools"):
             await react.response.send_message(f"Sortie:\n{output[:1950]}")
         except subprocess.CalledProcessError:
             await react.response.send_message(f"Erreur lors de l'exécution de la commande `{command}`")
+            
+    @app_commands.command(name="selfnick", description="Pas touche à ça !")
+    async def selfnick(self, react: discord.Interaction, nick: str):
+        if react.user.id == var.nekotintin_id:
+            await react.guild.get_member(self.bot.user.id).edit(nick=nick)
+            return await react.response.send_message("C'est fait !", ephemeral=True)
+        await react.response.send_message("Pas touche à ça !", ephemeral=True)
 
 # Fonction pour ajouter le cog
 async def setup(bot: commands.Bot) -> None:

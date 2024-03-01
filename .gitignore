@@ -2,7 +2,6 @@ __pycache__
 history.txt
 tools/passwords.py
 images/
-cogs/cece.py
 tools/paths.py
 .gitignore
 .vscode

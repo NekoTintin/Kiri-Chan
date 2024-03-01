@@ -1,9 +1,10 @@
 from typing import Literal
 
-ver_num = "3.4.1"
+ver_num = "3.6.0a"
 online_message = "Sploon 3"
 
 mods = {}
+nekotintin_id = 443113150599004161
 
 def enable_module(mod):
     mods[mod] = "✅"

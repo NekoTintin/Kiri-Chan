@@ -16,7 +16,7 @@ wrapper = Red(
     # ID pour s'identifier en tant que Bot sur Reddit
     client_id = pwrd.reddit_id,
     client_secret = pwrd.reddit_secret,
-    user_agent = "discord.py:kirlia-chan-bot:v3.4.1(by u/tintin361yt)",
+    user_agent = "discord.py:kirlia-chan-bot:v3.6.0a(by u/tintin361yt)",
     # ID du compte Reddit
     username = "Kirlia-chan",
     password = pwrd.reddit_password,
@@ -88,7 +88,7 @@ class Posts_Button(discord.ui.View):
         button.label = f"Downvoté ({score})"
         self.is_downvoted = True
         await react.message.edit(view=self)
-    
+
 
 class Reddit(commands.GroupCog, name="reddit"):
     
@@ -135,6 +135,20 @@ class Reddit(commands.GroupCog, name="reddit"):
         
         
     @app_commands.guild_only()
+    @app_commands.command(name="princessconnectnsfw", description="Affiche un post du subreddit r/PrincessConnectNSFW.")
+    async def _wallpaper(self, react: discord.Interaction) -> None:
+        await react.response.defer(ephemeral=False)
+        content = get_post("princessconnectnsfw", "hot", 30, react.channel.is_nsfw())
+        
+        if content == None:
+            return await react.followup.send(content="Le Subreddit n'a pas été trouvé, vérifie que tu ne t'es pas trompé en écrivant la commande.", ephemeral=True)
+        elif content.get("nsfw") == True:
+            return await react.followup.send("Ce post contient du NSFW, utilise la commande dans un salon NSFW.", ephemeral=True)
+        
+        await react.followup.send(embed=content.get("message"), view=content.get("view"), ephemeral=False)
+        
+        
+    @app_commands.guild_only()
     @app_commands.command(name="crappydesign", description="Affiche un post du subreddit r/CrappyDesign.")
     async def _crappy(self, react: discord.Interaction) -> None:
         await react.response.defer(ephemeral=False)
@@ -147,6 +161,12 @@ class Reddit(commands.GroupCog, name="reddit"):
     async def _honkai(self, react: discord.Interaction) -> None:
         await react.response.defer(ephemeral=False)
         content = get_post("HonkaiImpact3rd", "hot", 30, react.channel.is_nsfw())
+        
+        if content == None:
+            return await react.followup.send(content="Le Subreddit n'a pas été trouvé, vérifie que tu ne t'es pas trompé en écrivant la commande.", ephemeral=True)
+        elif content.get("nsfw") == True:
+            return await react.followup.send("Ce post contient du NSFW, utilise la commande dans un salon NSFW.", ephemeral=True)
+        
         await react.followup.send(embed=content.get("message"), view=content.get("view"), ephemeral=False)
         
         

@@ -104,6 +104,9 @@ class Image_Viewer():
                 await react.message.delete()
                 await react.followup.send("Il n'y a plus d'images dans ta liste, le lecteur d'image s'est fermé.", ephemeral=True)
             else:
+                self.link_list = load_file(f"{nekodata_path}{react.user.id}/list.txt")
+                self.curall-=1
+                self.current_in_selectoption-=1
                 msg = self._get_message(creation=True)
                 await react.message.edit(embed=msg[0], view=msg[1])
         
@@ -189,8 +192,8 @@ class Download(commands.Cog):
         # Suppresion des fichiers
         rmtree(user_folder)
         
-    @app_commands.command(name="list", description="Affiche ta liste de tes images.")
-    async def nekolist(self, react: discord.Interaction):
+    @app_commands.command(name="list", description="Affiche la liste de tes images.")
+    async def list(self, react: discord.Interaction):
         if not path.exists(f"{nekodata_path}{react.user.id}/list.txt") or path.getsize(f"{nekodata_path}{react.user.id}/list.txt") == 0:
             return await react.response.send_message("Ta liste ne contient aucune image.", ephemeral=True)
         
@@ -207,7 +210,7 @@ def delete_link(file_path, link_to_delete) -> bool:
             lines = f.readlines()
         
         # Supprimer le lien spécifié s'il existe dans la liste
-        lines = [line.strip() for line in lines if line.strip() != link_to_delete]
+        lines.pop(lines.index(link_to_delete + '\n'))
 
         with open(file_path, 'w') as f:
             f.writelines('\n'.join(lines))
