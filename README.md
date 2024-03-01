@@ -10,7 +10,7 @@ Contient des fonction pour Youtube, Reddit, Twitter, les différents booru et Pi
 - Pytz
 - pixivpy3 (à faire)
 - PRAW
-- YT_-_DLP
+- YT_DLP
 - Chat_exporter
 - Html2Image
 - pyshorteners
