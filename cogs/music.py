@@ -43,15 +43,18 @@ def get_video_list(search: str) -> list:
                         video_list.append({
                             "video_url": data['entries'][num]['url'],
                             "video_title": data['entries'][num]['title'],
+                            "extractor": data['entries'][num]['extractor'],
                             "video_index": num})
                 else:
                     video_list.append({"video_url": search,
                                 "video_title": data['title'],
+                                "extractor": data['extractor'],
                                 "video_index": 0})
             else:
                 data = ytdl.extract_info(f"ytsearch:{search}", download=False)
                 video_list.append({"video_url": data['entries'][0]['url'],
                                 "video_title": data['entries'][0]['title'],
+                                "extractor": "youtube",
                                 "video_index": 0})
         return video_list
     except:
@@ -83,8 +86,8 @@ def time_convert(time) -> str:
         return None
     
 def cut_title(number: str, title: str) -> str:
-        title_size = 100 - len(number)
-        return number + title[:title_size]
+    title_size = 100 - len(number)
+    return number + title[:title_size]
 
 def create_embed(data: dict, title: str, next_title: str, voice_channel_id: int, list_id: int, list_max: int, video_link: str, next_link: str, user_id: int) -> Embed:
     list_id += 1
@@ -200,7 +203,11 @@ class Player():
     def _create_select_list(self, video_list: list, start_num: int, cur_page: int) -> dict:
         select_list = []
         for num, link in enumerate(video_list):
-            select_list.append(discord.SelectOption(label=cut_title(f"{start_num+num+1}. ", video_list[num]["video_title"]), description=video_list[num]["video_url"], emoji="📹"))
+            if num == self.current_in_selectoption:
+                is_default = True
+            else:
+                is_default = False
+            select_list.append(discord.SelectOption(label=cut_title(f"{start_num+num+1}. ", video_list[num]["video_title"]), description=video_list[num]["video_url"], emoji=sites_dict.get(video_list[num]["extractor"], sites_dict["générique"])["emoji"], default=is_default))
         if cur_page > 0:
             select_list.append(discord.SelectOption(label=f"Page précédente", emoji="⬅️"))
         if cur_page < self.page_max - 1:
@@ -216,9 +223,9 @@ class Player():
         self.select_list = self.page_dict[self.pagecur]
 
         if self.voice.is_playing() == False:
-            play_button = Button(label="Pause", style=discord.ButtonStyle.success, emoji="<:pause_icon:1145849576117501992>", row=0)
+            play_button = Button(label="Pause", style=discord.ButtonStyle.success, emoji="<:pause_icon:1213236010071105596>", row=0)
         else:
-            play_button = Button(label="Reprendre", style=discord.ButtonStyle.success, emoji="<:play_icon:1145846385476915371>", row=0)
+            play_button = Button(label="Reprendre", style=discord.ButtonStyle.success, emoji="<:play_icon:1213235979708534866>", row=0)
         add_button = Button(label="Ajouter", style=discord.ButtonStyle.success, emoji="<:add_icon:1148310139900792923>", row=0)
         
         disc_button = Button(label="Déconnexion", style=discord.ButtonStyle.danger, emoji="<:disconnect_icon:1148310144703279134>", row=0)
@@ -255,11 +262,11 @@ class Player():
             if self.voice.is_playing() == True:
                 self.voice.pause()
                 play_button.label = "Reprendre"
-                play_button.emoji = "<:play_icon:1145846385476915371>"
+                play_button.emoji = "<:play_icon:1213235979708534866>"
             else:
                 self.voice.resume()
                 play_button.label = "Pause"
-                play_button.emoji = "<:pause_icon:1145849576117501992>"
+                play_button.emoji = "<:pause_icon:1213236010071105596>"
             await react.message.edit(view=self.message_view)
             
         async def add_music(react: discord.Interaction):

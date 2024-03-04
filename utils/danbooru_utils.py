@@ -19,7 +19,14 @@ def _create_request(tags: str) -> dict:
         return resp.json()
     else:
         return None
-
+    
+def cut_title(num: int, char: str, cpr) -> str:
+    title_size = 100 - (len(str(num)) + 2)
+    if not char == "":
+        return f"{num}. {char[:title_size]}"
+    else:
+        return f"{num}. {cpr[:title_size]}"
+    
 
 class Image_Viewer():
     
@@ -46,7 +53,7 @@ class Image_Viewer():
             self.max = len(self.img_list)
         self.current_list = self.page_dict[self.pagecur]
         self.curlink = self.page_dict[self.pagecur][self.current_in_selectoption].description
-        self.embed = self._create_embed()
+        self.embed = self._create_embed(self.search)
         self.view = self._create_view()
         return [self.embed, self.view]
     
@@ -62,19 +69,24 @@ class Image_Viewer():
     def _create_select_list(self, img_list: list, start_num: int) -> dict:
         select_list = []
         for num, link in enumerate(img_list):
-            if link == 0:
+            if link == 0 or link.get("file_url", None) == None:
                 continue
-            select_list.append(discord.SelectOption(label=f"Image {start_num+num+1}", description=link["file_url"][:100], emoji="🖼️"))
+            
+            if num == self.current_in_selectoption:
+                is_default = True
+            else:
+                is_default = False
+            select_list.append(discord.SelectOption(label=cut_title(start_num+num+1, link.get("tag_string_character", "No Data"), link.get("tag_string_copyright", "No Data")), description=link["file_url"][:100], emoji="🖼️", default=is_default))
         if self.pagecur > 0:
             select_list.append(discord.SelectOption(label=f"Page précédente", emoji="⬅️"))
         if self.pagecur < self.page_max:
             select_list.append(discord.SelectOption(label=f"Page suivante", emoji="➡️"))
         return select_list
         
-    def _create_embed(self):
-        emb = Embed(title=f"📋 [{self.curall+1}/{self.max-1}]", description=f"{self.desc}", color=0xFF5700)
+    def _create_embed(self, tags):
+        emb = Embed(title=f"📋 **[{self.curall+1}/{self.max}]** - Recherche pour les tags: *{tags}*", description=f"{self.desc}", color=0xFF5700)
         emb.set_image(url=self.curlink)
-        emb.set_footer(text=f"ID {self.img_list[self.curall]['id']} - Rating {'/'.join(self.rating)}")
+        emb.set_footer(text=f"ID {self.img_list[self.curall]['id']} - Rating {rating_dict[self.img_list[self.curall]['rating']]}")
         
         return emb
     
@@ -90,17 +102,17 @@ class Image_Viewer():
             
             if select_menu.values[0] == "Page précédente":
                 self.pagecur-=1
-                self.current_in_selectoption = 0
+                self.current_in_selectoption = -1
                 msg = self._get_message(creation=True)
                 await react.message.edit(embed=msg[0], view=msg[1])
             elif select_menu.values[0] == "Page suivante":
                 self.pagecur+=1
-                self.current_in_selectoption = 0
+                self.current_in_selectoption = -1
                 msg = self._get_message(creation=True)
                 await react.message.edit(embed=msg[0], view=msg[1])
             else:
-                self.current_in_selectoption = int((re.search(r'\d+$', select_menu.values[0]).group()) if re.search(r'\d+$', select_menu.values[0]) else None) - (self.pagecur*20) -1
-                self.curall = int((re.search(r'\d+$', select_menu.values[0]).group()) if re.search(r'\d+$', select_menu.values[0]) else None) -1
+                self.current_in_selectoption = int((re.search(r'\d+', select_menu.values[0]).group()) if re.search(r'\d+', select_menu.values[0]) else None) - (self.pagecur*20) -1
+                self.curall = int((re.search(r'\d+', select_menu.values[0]).group()) if re.search(r'\d+', select_menu.values[0]) else None) -1
                 msg = self._get_message(creation=True)
                 await react.message.edit(embed=msg[0], view=msg[1])
         
@@ -119,18 +131,16 @@ def search_on_danbooru(title: str, desc: str, search: str, num_of_query: int, ra
         return None
     
     list_of_img = []
-    errors = 0
-    for _ in range(num_of_query):
+    list_entries = 0
+    while list_entries != num_of_query:
         try:
             img = _create_request({"tags": f"{search} rating:{','.join(rating_list)}"})
             if img == []:
-                errors+=1
                 continue
             list_of_img.append(img)
+            list_entries+=1
         except:
-            errors+=1
             continue
-    list_of_img.append(errors)
     
     viewer = Image_Viewer(list_of_img, title, desc, search, rating_list)
     return viewer._get_message()

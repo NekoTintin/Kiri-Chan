@@ -33,7 +33,7 @@ class Image_Viewer():
             self.page_dict = self._create_dict()
             self.max = len(self.link_list)
         self.current_list = self.page_dict[self.pagecur]
-        self.curlink = self.page_dict[self.pagecur][self.current_in_selectoption].description
+        self.curlink = self.link_list[self.curall]
         self.embed = self._create_embed()
         self.view = self._create_view()
         return [self.embed, self.view]
@@ -50,7 +50,11 @@ class Image_Viewer():
     def _create_select_list(self, link_list: list, start_num: int) -> dict:
         select_list = []
         for num, link in enumerate(link_list):
-            select_list.append(discord.SelectOption(label=f"Élément {start_num+num+1}", description=link, emoji="🖼️"))
+            if num == self.current_in_selectoption:
+                is_default = True
+            else:
+                is_default = False
+            select_list.append(discord.SelectOption(label=f"Élément {start_num+num+1}", description=link, emoji="🖼️", default=is_default))
         if self.pagecur > 0:
             select_list.append(discord.SelectOption(label=f"Page précédente", emoji="⬅️"))
         if self.pagecur < self.page_max:
@@ -77,12 +81,12 @@ class Image_Viewer():
             
             if select_menu.values[0] == "Page précédente":
                 self.pagecur-=1
-                self.current_in_selectoption = 0
+                self.current_in_selectoption = -1
                 msg = self._get_message(creation=True)
                 await react.message.edit(embed=msg[0], view=msg[1])
             elif select_menu.values[0] == "Page suivante":
                 self.pagecur+=1
-                self.current_in_selectoption = 0
+                self.current_in_selectoption = -1
                 msg = self._get_message(creation=True)
                 await react.message.edit(embed=msg[0], view=msg[1])
             else:
@@ -213,7 +217,7 @@ def delete_link(file_path, link_to_delete) -> bool:
         lines.pop(lines.index(link_to_delete + '\n'))
 
         with open(file_path, 'w') as f:
-            f.writelines('\n'.join(lines))
+            f.writelines(''.join(lines))
         return True
     except:
         return False

@@ -20,7 +20,7 @@ class Pybooru(commands.Cog, name="pybooru"):
             return await react.followup.send("Pour afficher du NSFW, mets-toi dans un salon NSFW.")
         
         try:
-            result = dan_utils.search_on_danbooru("Recherche:", "Une image de Neko depuis Danbooru.", tags, nombre, nsfw_values[nsfw])
+            result = dan_utils.search_on_danbooru("Recherche:", "Une image depuis Danbooru.", tags, nombre, nsfw_values[nsfw])
         except:
             return await react.followup.send(f"Aucun résultat n'a été trouvé... Vérifie que tes tags soient corrects: **{tags}**")
         

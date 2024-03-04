@@ -1,6 +1,6 @@
 from typing import Literal
 
-ver_num = "3.6.0b"
+ver_num = "3.6.2"
 online_message = "Sploon 3"
 
 mods = {}
@@ -21,42 +21,50 @@ values = Literal[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 40, 50]
     
 sites_dict = {
     "dailymotion": {
-        "icon_url": "https://upload.wikimedia.org/wikipedia/commons/2/27/Logo_dailymotion.png",
+        "icon_url": "https://culture-sympathique.fr/discord_imgs/dailymotion.png",
+        "emoji": "<:dailymotion:1213230598597124127>",
         "color": 0x00bff9,
         "message": None
     },
     "soundcloud": {
-        "icon_url": "https://play-lh.googleusercontent.com/lvYCdrPNFU0Ar_lXln3JShoE-NaYF_V-DNlp4eLRZhUVkj00wAseSIm-60OoCKznpw=w240-h480",
+        "icon_url": "https://culture-sympathique.fr/discord_imgs/soundcloud.png",
+        "emoji": "<:soundcloud:1213230602787225743>",
         "color": 0xff6800,
         "message": None
     },
     "tiktok": {
-        "icon_url": "https://cdn.pixabay.com/photo/2021/06/15/12/28/tiktok-6338432_960_720.png",
+        "icon_url": "https://culture-sympathique.fr/discord_imgs/tiktok.png",
+        "emoji": "<:tiktok:1213230604309758023>",
         "color": 0xee1d52,
         "message": None
     },
     "twitch": {
-        "icon_url": "https://static-00.iconduck.com/assets.00/twitch-icon-2048x2048-tipdihgh.png",
+        "icon_url": "https://culture-sympathique.fr/discord_imgs/twitch.png",
+        "emoji": "<:twitch:1213233138113708112>",
         "color": 0x9146ff,
         "message": None
     },
     "twitter": {
-        "icon_url": "https://e7.pngegg.com/pngimages/804/985/png-clipart-social-media-logo-computer-icons-information-twitter-logo-media.png",
+        "icon_url": "https://img.freepik.com/vecteurs-premium/nouveau-logo-twitter-x-2023-telechargement-vectoriel-du-logo-twitter-x_691560-10796.jpg?w=360",
+        "emoji": "<a:Twitter:945123022329741332>",
         "color": 0x05acf0,
         "message": None
     },
     "youtube": {
-        "icon_url": "https://cdn.icon-icons.com/icons2/1099/PNG/512/1485482355-youtube_78661.png",
+        "icon_url": "https://culture-sympathique.fr/discord_imgs/youtube.png",
+        "emoji": "<:youtube:1213233140781551636>",
         "color": 0xfe0000,
         "message": None
     },
     "reddit": {
-        "icon_url": "https://freelogopng.com/images/all_img/1658834272reddit-logo-transparent.png",
+        "icon_url": "https://culture-sympathique.fr/discord_imgs/reddit.png",
+        "emoji": "<:reddit:1213231222080413706>",
         "color": 0xff4500,
         "message": None
     },
     "générique": {
         "thumbnail": "https://images.frandroid.com/wp-content/uploads/2018/08/guide-apps-video-android.jpg",
+        "emoji": ":video_camera:",
         "icon_url": "https://cdn0.iconfinder.com/data/icons/basic-uses-symbol-vol-2/100/Help_Need_Suggestion_Question_Unknown-512.png",
         "color": 0xffffff,
         "message": None
