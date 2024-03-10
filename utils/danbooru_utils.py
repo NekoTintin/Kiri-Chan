@@ -20,12 +20,14 @@ def _create_request(tags: str) -> dict:
     else:
         return None
     
-def cut_title(num: int, char: str, cpr) -> str:
+def cut_title(num: int, char: str, cpr: str) -> str:
     title_size = 100 - (len(str(num)) + 2)
     if not char == "":
         return f"{num}. {char[:title_size]}"
-    else:
+    elif not cpr == "": 
         return f"{num}. {cpr[:title_size]}"
+    else:
+        return f"{num}. original"
     
 
 class Image_Viewer():
@@ -69,7 +71,7 @@ class Image_Viewer():
     def _create_select_list(self, img_list: list, start_num: int) -> dict:
         select_list = []
         for num, link in enumerate(img_list):
-            if link == 0 or link.get("file_url", None) == None:
+            if link == 0:
                 continue
             
             if num == self.current_in_selectoption:
@@ -103,11 +105,13 @@ class Image_Viewer():
             if select_menu.values[0] == "Page précédente":
                 self.pagecur-=1
                 self.current_in_selectoption = -1
+                self.curall = self.pagecur*20
                 msg = self._get_message(creation=True)
                 await react.message.edit(embed=msg[0], view=msg[1])
             elif select_menu.values[0] == "Page suivante":
                 self.pagecur+=1
                 self.current_in_selectoption = -1
+                self.curall = self.pagecur*20
                 msg = self._get_message(creation=True)
                 await react.message.edit(embed=msg[0], view=msg[1])
             else:

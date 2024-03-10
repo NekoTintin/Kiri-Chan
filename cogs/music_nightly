@@ -159,7 +159,7 @@ class Player():
         self.video_data = {}
         self.video_url = ""
         self.is_button = False
-                
+        
     # Gestion de la lecture audio
     async def audio_play(self, playing_mode: bool = False) -> None:
         if self.voice.is_playing():
@@ -222,7 +222,7 @@ class Player():
                 is_default = True
             else:
                 is_default = False
-            select_list.append(discord.SelectOption(label=cut_title(f"{start_num+num+1}. ", video_list[num]["video_title"]), description=video_list[num]["video_url"], emoji=sites_dict.get(video_list[num]["extractor"], sites_dict["générique"])["emoji"], default=is_default))
+            select_list.append(discord.SelectOption(label=cut_title(f"{start_num+num+1}. ", video_list[num]["video_title"]), description=video_list[num]["video_url"][:100], emoji=sites_dict.get(video_list[num]["extractor"], sites_dict["générique"])["emoji"], default=is_default))
         if cur_page > 0:
             select_list.append(discord.SelectOption(label=f"Page précédente", emoji="⬅️"))
         if cur_page < self.page_max - 1:
@@ -404,10 +404,12 @@ class Player():
         if not is_live:
             rewi_button = Button(label="Rembobiner", style=discord.ButtonStyle.primary, emoji="<:back_icon:1148310142664851507>", row=1)
 
-            short = pyshorteners.Shortener()
-            short_url = short.tinyurl.short(self.video_url)
-            down_button = Button(label="Télécharger", style=discord.ButtonStyle.link, url=short_url, row=0)
-
+            try:
+                short = pyshorteners.Shortener()
+                short_url = short.tinyurl.short(self.video_url)
+                down_button = Button(label="Télécharger", style=discord.ButtonStyle.link, url=short_url, row=0)
+            except:
+                down_button = Button(label="Télécharger", style=discord.ButtonStyle.link, url="http://www.google.com", row=0, disabled=True)
             view.add_item(down_button)
             view.add_item(rewi_button)
             rewi_button.callback = rewind
@@ -443,7 +445,7 @@ class Player():
         self.message_id = id
 
 @app_commands.guild_only()
-class Music(commands.Cog, name="music"):
+class Music_Nightly(commands.Cog, name="music_night"):
     
     def __init__(self, bot) -> None:
         self.bot = bot
@@ -454,7 +456,7 @@ class Music(commands.Cog, name="music"):
         self.channel = None
         super().__init__()
         
-    @app_commands.command(name="play", description="Joue le son d'une vidéo ou d'un live depuis un lien ou une recherche.")
+    @app_commands.command(name="experimental_play", description="CETTE COMMANDE EST EXPÉRIMENTALE, utilisez plutôt /play")
     async def _play(self, react: discord.Interaction, flux: str, salon:str=None) -> None:
         await self.bot.wait_until_ready()
         await react.response.defer(ephemeral=False)
@@ -483,37 +485,24 @@ class Music(commands.Cog, name="music"):
         elif self.voice.is_playing() or self.voice.is_paused():
             return await react.followup.send("Kiri-chan est déjà connectée dans un autre salon. Pour lire une autre musique, ajoute la avec le bouton Ajouter.")
         
-        try:
-            if self.dict_of_player.get(self.guild.id, None) != None:
-                self.dict_of_player[self.guild.id] = None
-                current_player = Player(self.bot, self.voice, react.channel, self.channel, react.user.id)
-                self.dict_of_player[self.guild.id] = current_player
-            else:
-                current_player = Player(self.bot, self.voice, react.channel, self.channel, react.user.id)
-                self.dict_of_player[self.guild.id] = current_player
+        if self.dict_of_player.get(self.guild.id, None) != None:
+            self.dict_of_player[self.guild.id] = None
+            current_player = Player(self.bot, self.voice, react.channel, self.channel, react.user.id)
+            self.dict_of_player[self.guild.id] = current_player
+        else:
+            current_player = Player(self.bot, self.voice, react.channel, self.channel, react.user.id)
+            self.dict_of_player[self.guild.id] = current_player
             
-            message = await current_player.play_sound(flux)
-            if message.get("content", None) != None:
-                await react.followup.send(content=message.get("content"), ephemeral=False)
-            else:
-                sended_msg = await react.followup.send(embed=message.get("embed"), view=message.get("view"), ephemeral=False, wait=True)
-                msg2 = await sended_msg.fetch()
-                current_player.msg_id(msg2.id)
-                self.dict_of_message = {self.guild.id: message}
+        message = await current_player.play_sound(flux)
+        if message.get("content", None) != None:
+            await react.followup.send(content=message.get("content"), ephemeral=False)
+        else:
+            sended_msg = await react.followup.send(embed=message.get("embed"), view=message.get("view"), ephemeral=False, wait=True)
+            msg2 = await sended_msg.fetch()
+            current_player.msg_id(msg2.id)
+            self.dict_of_message = {self.guild.id: message}
 
-            self.bot.loop.create_task(self._check_members_in_channel())
-        except:
-            await react.followup.send(f"Désolée, la fonction </play:1140307587120763011> est cassée mais tu peux te plaindre à {self.bot.get_user(nekotintin_id).mention} !")
-    
-    @app_commands.command(name="disconnect", description="Déconnecte le bot.")
-    async def _disconnect(self, react: discord.Interaction):
-        guild = react.guild
-        voice = discord.utils.get(self.bot.voice_clients, guild=guild)
-        if voice == None:
-            return await react.response.send_message("Je ne pas connectée à un salon vocal", ephemeral=True)
-        await voice.disconnect()
-        await react.response.send_message("Kiri-chan s'est déconnectée.", ephemeral=True, delete_after=15)
-        await self.bot.change_presence(status=discord.Status.online, activity=discord.Activity(type=discord.ActivityType.watching, name=online_message))
+        #self.bot.loop.create_task(self._check_members_in_channel())
             
     async def _check_members_in_channel(self):
         await self.bot.wait_until_ready()
@@ -532,4 +521,4 @@ class Music(commands.Cog, name="music"):
             await asyncio.sleep(600)
 
 async def setup(bot):
-    await bot.add_cog(Music(bot))
+    await bot.add_cog(Music_Nightly(bot))

@@ -1,6 +1,6 @@
 from typing import Literal
 
-ver_num = "3.6.2"
+ver_num = "3.7.0"
 online_message = "Sploon 3"
 
 mods = {}
@@ -56,15 +56,28 @@ sites_dict = {
         "color": 0xfe0000,
         "message": None
     },
+    "youtube:tab": {
+        "icon_url": "https://culture-sympathique.fr/discord_imgs/youtube.png",
+        "emoji": "<:youtube:1213233140781551636>",
+        "color": 0xfe0000,
+        "message": None
+    },
     "reddit": {
         "icon_url": "https://culture-sympathique.fr/discord_imgs/reddit.png",
         "emoji": "<:reddit:1213231222080413706>",
         "color": 0xff4500,
         "message": None
     },
+    "discord": {
+        "icon_url": "https://culture-sympathique.fr/discord_imgs/discord.png",
+        "emoji": "<:discord:1215742891448733836>",
+        "thumbnail": "https://droplr.com/wp-content/uploads/2020/10/Discord-music-e1635364775454.png",
+        "color": 0xff4500,
+        "message": None
+    },
     "générique": {
         "thumbnail": "https://images.frandroid.com/wp-content/uploads/2018/08/guide-apps-video-android.jpg",
-        "emoji": ":video_camera:",
+        "emoji": "📹",
         "icon_url": "https://cdn0.iconfinder.com/data/icons/basic-uses-symbol-vol-2/100/Help_Need_Suggestion_Question_Unknown-512.png",
         "color": 0xffffff,
         "message": None

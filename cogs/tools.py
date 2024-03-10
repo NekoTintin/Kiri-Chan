@@ -12,6 +12,10 @@ import subprocess
 # Module du bot
 import tools.variables as var
 
+from typing import Literal
+
+mods_list = Literal["AdReplacer", "ArtGallery", "Crypto-Fanta", "PeppaPig3"]
+
 class Tools(commands.GroupCog, name="tools"):
     
     # Méthode d'initialisation de la classe (avec bot an argument).
@@ -59,6 +63,21 @@ class Tools(commands.GroupCog, name="tools"):
             await react.guild.get_member(self.bot.user.id).edit(nick=nick)
             return await react.response.send_message("C'est fait !", ephemeral=True)
         await react.response.send_message("Pas touche à ça !", ephemeral=True)
+        
+    @app_commands.command(name="envoyer", description="Envoie un message pour informer d'une MàJ de mod.")
+    async def _send_update(self, react: discord.Interaction, mod: mods_list, version: float, url: str, contenu: str) -> None:
+        await self.bot.wait_until_ready()
+        
+        if react.user.id != 443113150599004161:
+            return await react.response.send_message("Tu ne peux pas utiliser cette commande.", ephemeral=True)
+        
+        msg = Embed(title=f"Mise à jour du **{mod}**",
+                    description=f"La version *{version}* est disponible à cette URL: {url}",
+                    color=0x0d7ecd, url=url)
+        msg.add_field(name="Contenu de la MàJ", value=contenu, inline=False)
+        msg.set_author(name=self.bot.user.display_name, icon_url=self.bot.user.display_avatar)
+        
+        await react.response.send_message(embed=msg)
 
 # Fonction pour ajouter le cog
 async def setup(bot: commands.Bot) -> None:
