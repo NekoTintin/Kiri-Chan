@@ -6,7 +6,7 @@ from discord import app_commands
 from discord.embeds import Embed
 # Bibliothèques
 import os
-#import sqlite3
+import sqlite3
 from secrets import token_hex
 from validators import url as test_url
 # Modules avec tous les mots de passe [que vous ne pouvez pas voir :)].
@@ -66,6 +66,20 @@ user_stat_menu = app_commands.ContextMenu(name="Niveau de Puissance", callback=_
 bot.tree.add_command(user_stat_menu)
 """
 
+async def _user_birthday(react: discord.Interaction, user: discord.Member):
+    database = sqlite3.connect(paths.db_path)
+    cur = database.cursor()
+    cur.execute("""SELECT discord_id, user_date FROM Birthdays WHERE discord_id=?""", (user.id,))
+    database.commit()
+    response = cur.fetchall()
+    database.close()
+    await react.response.send_message(f"{user.display_name.capitalize()} est né(e) le {response[0][1]}.", ephemeral=True)
+    
+
+user_birthday_menu = app_commands.ContextMenu(name="Date d'anniversaire", callback=_user_birthday)
+bot.tree.add_command(user_birthday_menu)
+
+
 async def _multipost(react: discord.Interaction, msg: discord.Message):
     options = list()
     for guild in bot.guilds:
@@ -90,7 +104,7 @@ async def _multipost(react: discord.Interaction, msg: discord.Message):
                 emb.set_image(url=msg.content)
             emb.set_author(name=msg.author.name, icon_url=msg.author.avatar.url)
             emb.set_footer(text=f"Depuis {bot.user.display_name} via la commande multipost.", icon_url=bot.user.avatar.url)
-            await bot.get_channel(int(val)).send(embed=emb)
+            channel = await bot.get_channel(int(val)).send(embed = emb)
         await react.followup.send(content="Tout a été envoyé !", ephemeral=True)
 
     select_menu.callback = callback

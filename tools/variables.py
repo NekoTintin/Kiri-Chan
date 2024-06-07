@@ -1,7 +1,7 @@
 from typing import Literal
 
-ver_num = "3.7.0"
-online_message = "Sploon 3"
+ver_num = "3.7.2"
+online_message = "しかのこのこのここしたんたん"
 
 mods = {}
 nekotintin_id = 443113150599004161
@@ -14,6 +14,8 @@ def disable_module(mod):
     
 def get_modules():
     return mods
+
+keywords = ["général", "meme", "accueil", "seal-zone", "bienvenue"]
     
 ban_domain = ["twitter", "deezer", "spotify"]
 

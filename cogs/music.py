@@ -101,7 +101,7 @@ def create_embed(data: dict, title: str, next_title: str, voice_channel_id: int,
         thumbnail = sites_dict.get(extractor["extractor"], "générique")["thumbnail"]
     
     emb = Embed(title=f":headphones: **{title}**",
-        description=f"Actuellement en cours de lecture dans <#{voice_channel_id}>.\n**Cette commande n'est pas testée jusqu'au bout.**",
+        description=f"Actuellement en cours de lecture dans <#{voice_channel_id}>.**",
         color=sites_dict.get(extractor["extractor"])["color"],
         type="image",
         url=video_link)
@@ -177,6 +177,7 @@ class Player():
                 next_url = None
             self.message_embed = create_embed(self.video_data, self.list[self.list_id]['video_title'], next_title, self.voice_channel.id, self.list_id, self.list_max, self.list[self.list_id]["video_url"], next_url, self.user_id)
             self.message_view = await self.create_view(self.video_data['is_live'])
+            await self.set_status(self.list[self.list_id]['video_title'])
 
             # Charge la prochaine musique dans le dict
             async def play_next():
@@ -222,7 +223,7 @@ class Player():
                 is_default = True
             else:
                 is_default = False
-            select_list.append(discord.SelectOption(label=cut_title(f"{start_num+num+1}. ", video_list[num]["video_title"]), description=video_list[num]["video_url"], emoji=sites_dict.get(video_list[num]["extractor"], sites_dict["générique"])["emoji"], default=is_default))
+            select_list.append(discord.SelectOption(label=cut_title(f"{start_num+num+1}. ", video_list[num]["video_title"]), description=video_list[num]["video_url"][:99], emoji=sites_dict.get(video_list[num]["extractor"], sites_dict["générique"])["emoji"], default=is_default))
         if cur_page > 0:
             select_list.append(discord.SelectOption(label=f"Page précédente", emoji="⬅️"))
         if cur_page < self.page_max - 1:
@@ -330,11 +331,11 @@ class Player():
                 self.list_id = rd(0, self.list_max-1)
             else:
                 self.list_id += 1
-                
+
             self.pagecur = int(self.list_id/20)
             self.current_in_selectoption = self.list_id - self.pagecur*20
             self.is_button = True
-            
+
             await self.audio_play(playing_mode=True)
             await react.message.edit(suppress=True)
             await react.message.edit(embed=self.message_embed, view=self.message_view)
@@ -385,8 +386,7 @@ class Player():
             
                 await react.message.edit(suppress=True)
                 await react.message.edit(embed=self.message_embed, view=self.message_view)
-        
-                
+
         current_vid = self.list_id + 1
         if self.list_max == 1:
             back_button.disabled = True
@@ -405,7 +405,7 @@ class Player():
             rewi_button = Button(label="Rembobiner", style=discord.ButtonStyle.primary, emoji="<:back_icon:1148310142664851507>", row=1)
 
             short = pyshorteners.Shortener()
-            short_url = short.tinyurl.short(self.video_url)
+            short_url = short.isgd.short(self.video_url)
             down_button = Button(label="Télécharger", style=discord.ButtonStyle.link, url=short_url, row=0)
 
             view.add_item(down_button)
