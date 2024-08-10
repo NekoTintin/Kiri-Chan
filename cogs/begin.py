@@ -1,11 +1,14 @@
+import subprocess
 import discord
 from discord.ext import commands
 from discord.embeds import Embed
+from discord import app_commands
 from datetime import datetime as dt
 import pytz
 import tools.variables as var
 import platform
 import tools.paths as paths
+from secrets import SystemRandom
 
 def write_in_txt(content, file):
     with open(file, "w") as f:
@@ -16,12 +19,22 @@ def get_time():
     time = now.strftime("%d/%m/%Y - %H:%M:%S")
 
     return time
+
+class Pers_View(discord.ui.View):
+
+    def __init__(self):
+        super().__init__(timeout=None)
+
+    @discord.ui.button(label="Redémarrer", style=discord.ButtonStyle.gray, custom_id="nekobot_reset_id:button_callback")
+    async def button_callback(self, react: discord.Interaction, button: discord.ui.Button):
+        await react.response.send_message("NekoBot en cours de redémarrage...", ephemeral=True)
+        subprocess.Popen("sudo systemctl restart nekobot", text=True, shell=True)
   
 class Begin(commands.Cog):
     # Fonction d'initialisation
     def __init__(self, bot) -> None:
         self.bot = bot
-        
+
     # Se déclenche quand le bot est prêt
     @commands.Cog.listener()
     async def on_ready(self):
@@ -54,7 +67,7 @@ class Begin(commands.Cog):
                     file.write(f"    Rôles: {', '.join([role.name for role in member.roles])}\n")
                     file.write(f"    Membre depuis: {str(member.joined_at)}\n")
                 file.write("\n")
-        
+
     # Permet de charger un cog
     @commands.command(name="load")
     async def load(self, ctx, extention):
@@ -130,6 +143,13 @@ class Begin(commands.Cog):
             await ctx.send(f"{len(fmt)} commandes ont été synchronisées.")
         else:
             ctx.bot.tree.copy()
-        
+            
+    @app_commands.command(name="button", description="desc")
+    async def butt_command(self, react: discord.Interaction):
+        await react.response.send_message("Envoyé")
+
+        channel = self.bot.get_channel(1213081550216757268)
+        await channel.send("Le NekoBot ne fonctionne pas toujours correctement, appuie sur ce bouton pour le redémarrer.", view=Pers_View())
+
 async def setup(bot):
     await bot.add_cog(Begin(bot))

@@ -21,6 +21,7 @@ class Bdsm(commands.Cog):
             
             if now.hour == 12 and now.strftime('%A') == "Tuesday":
                 await channel.send("https://culture-sympathique.fr/images/bdsmelvin.png")
+                #await channel.send("Suite à l'augmentation du prix de l'API de Melvin, le BDSM et BDSMelvin s'arrête à partir d'aujourd'hui.")
                 
             await asyncio.sleep(3600)
             

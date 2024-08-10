@@ -101,7 +101,7 @@ def create_embed(data: dict, title: str, next_title: str, voice_channel_id: int,
         thumbnail = sites_dict.get(extractor["extractor"], "générique")["thumbnail"]
     
     emb = Embed(title=f":headphones: **{title}**",
-        description=f"Actuellement en cours de lecture dans <#{voice_channel_id}>.**",
+        description=f"Actuellement en cours de lecture dans <#{voice_channel_id}>.",
         color=sites_dict.get(extractor["extractor"])["color"],
         type="image",
         url=video_link)
@@ -289,7 +289,7 @@ class Player():
             class Add_Modal(discord.ui.Modal, title="Ajouter un lien ou une recherche"):
                 link = discord.ui.TextInput(label="Entre ton lien ou ta recherche ici.",
                     style=discord.TextStyle.short,
-                    placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                                            placeholder="https://www.youtube.com/watch?v=zuXdMjFCOow",
                     required=True)
     
                 async def on_submit(self, react: discord.Interaction) -> None:
@@ -479,7 +479,7 @@ class Music(commands.Cog, name="music"):
             self.voice: discord.VoiceClient = discord.utils.get(self.bot.voice_clients, guild=self.guild)
         elif self.voice != None:
             if self.dict_of_player.get(self.guild.id, None) != None:
-                return await react.followup.send("Kiri-chan est déjà connectée. Pour lire une autre musique, ajoute la avec le bouton Ajouter.")
+                return await react.followup.send("Kiri-chan est déjà connectée. Pour lire une autre musique, ajoute la avec le bouton Ajouter. (c'est clairement une Skill Issue)")
         elif self.voice.is_playing() or self.voice.is_paused():
             return await react.followup.send("Kiri-chan est déjà connectée dans un autre salon. Pour lire une autre musique, ajoute la avec le bouton Ajouter.")
         

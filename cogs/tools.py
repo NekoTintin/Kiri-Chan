@@ -1,6 +1,7 @@
 # -- coding: utf-8 --
 
 # Biblio de Discord
+from dis import disco
 from genericpath import isdir
 import discord
 from discord.ext import commands
@@ -18,10 +19,6 @@ import tools.variables as var
 from typing import Literal
 
 mods_list = Literal["AdReplacer", "ArtGallery", "Crypto-Fanta", "PeppaPig3"]
-level_list = Literal["0", "1", "2", "3", "4", "5"]
-nb_files = {
-    "0": 10, "1": 11, "2": 14
-}
 
 class Tools(commands.GroupCog, name="tools"):
     
@@ -86,29 +83,13 @@ class Tools(commands.GroupCog, name="tools"):
         
         await react.response.send_message(embed=msg)
         
-    @app_commands.command(name="statut", description="Définie le status du bot")
+    @app_commands.command(name="statut", description="Défini le status du bot")
     async def status(self, react: discord.Interaction, message: str):
         await self.bot.wait_until_ready()
         
         if react.user.id == var.nekotintin_id:
             await self.bot.change_presence(status=discord.Status.online, activity=discord.Activity(type=discord.ActivityType.watching, name=message))
             await react.response.send_message("Statut changé !", ephemeral=True)
-            
-    @app_commands.command(name="random_exo", description="Affiche un exercice aléatoire")
-    async def rdex(self, react: discord.Interaction, niveau: level_list):
-        await self.bot.wait_until_ready()
-        
-        rd_file = ""
-        rep = f"/home/tintin/discord_bot/Kiri-chan/data/exos/{niveau}/"
-        if os.path.isdir(rep):
-            files = os.listdir(rep)
-            if files:
-                rd_file = SystemRandom().choice(files)
-        
-        with open (rep + rd_file, "r") as opened_file:
-            content = opened_file.read()
-            
-        await react.response.send_message(content)
 
 # Fonction pour ajouter le cog
 async def setup(bot: commands.Bot) -> None:

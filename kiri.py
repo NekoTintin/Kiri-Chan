@@ -4,6 +4,7 @@ import asyncio
 from discord.ext import commands
 from discord import app_commands
 from discord.embeds import Embed
+from cogs.begin import Pers_View
 # Bibliothèques
 import os
 import sqlite3
@@ -22,6 +23,11 @@ online_message = var.online_message
 intents = discord.Intents.all()
 intents.message_content = True
 bot = commands.Bot(command_prefix="-", owner_ids=set(pwrd.owner), help_command=None, intents=intents)
+
+async def setup_hook():
+    bot.add_view(Pers_View(), message_id=1271963176618954785)
+
+bot.setup_hook = setup_hook
 
 @bot.command()
 async def main(bot):

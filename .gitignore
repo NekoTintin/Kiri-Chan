@@ -7,3 +7,4 @@ tools/paths.py
 .vscode
 data
 tools/paths.py
+exec/
