@@ -91,14 +91,14 @@ def cut_title(number: str, title: str) -> str:
 
 def create_embed(data: dict, title: str, next_title: str, voice_channel_id: int, list_id: int, list_max: int, video_link: str, next_link: str, user_id: int) -> Embed:
     list_id += 1
-    extractor = sites_dict.get(data["extractor"], sites_dict["générique"])
+    extractor = sites_dict.get(data["extractor"], sites_dict["generic"])
     extractor["extractor"] = data["extractor"]
     if "cdn.discordapp.com" in video_link:
         extractor["extractor"] = "discord"
     if data["thumbnail"] != None:
         thumbnail = data["thumbnail"]
     else:
-        thumbnail = sites_dict.get(extractor["extractor"], "générique")["thumbnail"]
+        thumbnail = sites_dict.get(extractor["extractor"], "generic")["thumbnail"]
     
     emb = Embed(title=f":headphones: **{title}**",
         description=f"Actuellement en cours de lecture dans <#{voice_channel_id}>.",
@@ -223,7 +223,7 @@ class Player():
                 is_default = True
             else:
                 is_default = False
-            select_list.append(discord.SelectOption(label=cut_title(f"{start_num+num+1}. ", video_list[num]["video_title"]), description=video_list[num]["video_url"][:99], emoji=sites_dict.get(video_list[num]["extractor"], sites_dict["générique"])["emoji"], default=is_default))
+            select_list.append(discord.SelectOption(label=cut_title(f"{start_num+num+1}. ", video_list[num]["video_title"]), description=video_list[num]["video_url"][:99], emoji=sites_dict.get(video_list[num]["extractor"], sites_dict["generic"])["emoji"], default=is_default))
         if cur_page > 0:
             select_list.append(discord.SelectOption(label=f"Page précédente", emoji="⬅️"))
         if cur_page < self.page_max - 1:

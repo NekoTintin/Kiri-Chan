@@ -1,6 +1,6 @@
 from typing import Literal
 
-ver_num = "3.8.0"
+ver_num = "3.8.1"
 online_message = "しかのこのこのここしたんたん"
 
 mods = {}
@@ -77,7 +77,7 @@ sites_dict = {
         "color": 0xff4500,
         "message": None
     },
-    "générique": {
+    "generic": {
         "thumbnail": "https://images.frandroid.com/wp-content/uploads/2018/08/guide-apps-video-android.jpg",
         "emoji": "📹",
         "icon_url": "https://cdn0.iconfinder.com/data/icons/basic-uses-symbol-vol-2/100/Help_Need_Suggestion_Question_Unknown-512.png",
