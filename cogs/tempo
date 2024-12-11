@@ -1,0 +1,19 @@
+import discord
+from discord.ext import commands
+
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver import FirefoxOptions
+
+opts = FirefoxOptions()
+opts.add_argument("--headless")
+
+class Temp(commands.GroupCog, name="tempo"):
+    
+    def __init__(self, bot: commands.Bot) -> None:
+        self.bot = bot
+        super().__init__()
+        
+async def setup(bot: commands.Bot) -> None:
+    await bot.add_cog(Temp(bot))

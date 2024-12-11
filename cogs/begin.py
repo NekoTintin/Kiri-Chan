@@ -8,7 +8,6 @@ import pytz
 import tools.variables as var
 import platform
 import tools.paths as paths
-from secrets import SystemRandom
 
 def write_in_txt(content, file):
     with open(file, "w") as f:
@@ -29,7 +28,7 @@ class Pers_View(discord.ui.View):
     async def button_callback(self, react: discord.Interaction, button: discord.ui.Button):
         await react.response.send_message("NekoBot en cours de redémarrage...", ephemeral=True)
         subprocess.Popen("sudo systemctl restart nekobot", text=True, shell=True)
-  
+
 class Begin(commands.Cog):
     # Fonction d'initialisation
     def __init__(self, bot) -> None:
@@ -43,7 +42,7 @@ class Begin(commands.Cog):
         print(f"Version Discord.py: {discord.__version__ }")
         print(f"Version du bot: {var.ver_num}")
         await self.bot.change_presence(status=discord.Status.online, activity=discord.Activity(type=discord.ActivityType.watching, name=var.online_message))
-        
+
         with open(f"{paths.data_path}list_of_channels.txt", "w") as file:
             pass
         with open(f"{paths.data_path}list_of_channels.txt", "a") as file:
@@ -51,15 +50,15 @@ class Begin(commands.Cog):
                 file.write(f"---- {guild.name}:\n")
                 for channel in guild.channels:
                     file.write(f"- {channel}\n")
-        
+
         with open(f"{paths.data_path}list_of_user.txt", "w") as file:
             pass
         with open(f"{paths.data_path}list_of_user.txt", "a") as file:
             file.write("Liste des membres :\n\n")
-            
+
             for guild in self.bot.guilds:
                 file.write(f"Serveur : {guild.name}\n")
-                
+
                 for member in guild.members:
                     file.write(f"-- Nom: {member.name}\n")
                     file.write(f"    ID: {member.id}\n")
@@ -76,7 +75,7 @@ class Begin(commands.Cog):
         await ctx.bot.tree.sync()
         var.enable_module(extention)
         await ctx.send(f"Le module {extention} a bien été chargé")
-        
+
     # Permet de décharger un cog
     @commands.command(name="unload")
     async def unload(self, ctx, extention):
@@ -85,7 +84,7 @@ class Begin(commands.Cog):
         await ctx.bot.tree.sync()
         var.disable_module(extention)
         await ctx.send(f"Le module {extention} a bien été déchargé")
-        
+
     # Permet de recharger un cog
     @commands.command(name="reload")
     async def reload(self, ctx, extention):
@@ -94,7 +93,7 @@ class Begin(commands.Cog):
         await self.bot.load_extension(f"cogs.{extention}")
         await ctx.bot.tree.sync()
         await ctx.send(f"Le module {extention} a bien été rechargé")
-        
+
     # Envoie un message avec la liste des modules
     @commands.command(name="modules", aliases=['mod'])
     async def modules(self, ctx):
@@ -103,7 +102,7 @@ class Begin(commands.Cog):
         for mod in mods:
             message += f"- **{mod}**: {mods[mod]}\n"
         await ctx.send(message)
-        
+
     # Se déclenche à chaque message
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -112,29 +111,29 @@ class Begin(commands.Cog):
             return
         if self.bot.user.mentioned_in(message) and message.mention_everyone == False:
             await message.channel.send(f"Hey {message.author.mention}, utilise **/** pour afficher la liste des commandes.")
-            
+
         if msg_str == "":
             content = "[image]" 
         else:
             content = str(message.content)
-            
+
         if "womp womp" in msg_str.lower():
             womp = Embed(title="WOMP WOMP !!!", color=0x800080)
             womp.set_image(url="https://media.tenor.com/13xUat9h3T4AAAAd/shylily-womp.gif")
             await message.channel.send(embed=womp)
-            
+
         if "waku waku" in msg_str.lower():
             waku = Embed(title="WAKU WAKU !!!", color=0xee8281)
             waku.set_image(url="https://www.serieously.com/app/uploads/2022/06/anya.gif")
             await message.channel.send(embed=waku)
-    
+
         username = await self.bot.fetch_user(message.author.id)
         with open (f"{paths.data_path}history.txt", "a") as hist:
             hist.write(f"{get_time()} - {username}: {content}\n")
-        
+
         if message.channel.id == 935514239035142164:
             await message.delete()
-            
+
     # Pour synchroniser les commandes slash
     @commands.command()
     async def sync(self, ctx, guild = None) -> None:
@@ -143,13 +142,6 @@ class Begin(commands.Cog):
             await ctx.send(f"{len(fmt)} commandes ont été synchronisées.")
         else:
             ctx.bot.tree.copy()
-            
-    @app_commands.command(name="button", description="desc")
-    async def butt_command(self, react: discord.Interaction):
-        await react.response.send_message("Envoyé")
-
-        channel = self.bot.get_channel(1213081550216757268)
-        await channel.send("Le NekoBot ne fonctionne pas toujours correctement, appuie sur ce bouton pour le redémarrer.", view=Pers_View())
 
 async def setup(bot):
     await bot.add_cog(Begin(bot))

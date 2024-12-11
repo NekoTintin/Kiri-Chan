@@ -46,7 +46,7 @@ class Tools(commands.GroupCog, name="tools"):
         .add_field(name="Repo de NekoBot", value="https://github.com/Tintin361/NekoBot")\
         .add_field(name="Repo de VeemoBot", value="https://github.com/Tintin361/VeemoBot")
         await react.response.send_message(embed=message, ephemeral=True)
-        
+
     # Envoie des commandes en Bash
     @app_commands.command(name="syscom", description="Envoie un commande vers l'OS")
     async def syscom(self, react: discord.Interaction, command: str):

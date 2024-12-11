@@ -1,6 +1,6 @@
 from typing import Literal
 
-ver_num = "3.8.1"
+ver_num = "3.9.2"
 online_message = "しかのこのこのここしたんたん"
 
 mods = {}
